@@ -32,8 +32,10 @@ namespace Controllers
                 var playlists = await Context.Playlists.Select(p =>
                     new
                     {
-                        Id = p.Id,
-                        Name = p.Name
+                        p.Id,
+                        p.Name,
+                        p.NumberOfTracks,
+                        p.Length
                     }).ToListAsync();
 
                 return Ok(playlists);
@@ -50,14 +52,14 @@ namespace Controllers
         {
             try
             {
-                var query = Context.Playlists.Where(p => p.Id == id)
-                .Include(p => p.PlaylistTracks)
-                .ThenInclude(pt => pt.Track)
+                var query = Context.PlaylistTracks
+                .Include(pt => pt.Playlist)
+                .Include(pt => pt.Track)
                 .ThenInclude(t => t.Release)
-                .ThenInclude(r => r.Artists);
+                .ThenInclude(r => r.Artists)
+                .Where(pt => pt.Playlist.Id == id);
 
-                var objects = await query.Select(p =>
-                    p.PlaylistTracks.Select(pt =>
+                var objects = await query.Select(pt =>
                     new
                     {
                         Id = pt.Track.Id,
@@ -67,8 +69,7 @@ namespace Controllers
                         Release = pt.Track.Release.Name,
                         Duration = pt.Track.Duration,
                         Rating = pt.Track.Rating,
-                    })
-                ).FirstAsync();
+                    }).ToListAsync();
 
                 return Ok(objects);
             }
@@ -77,5 +78,60 @@ namespace Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [Route("AddPlaylist/{name}")]
+        [HttpPost]
+        public async Task<ActionResult> AddPlaylist(string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                {
+                    return BadRequest("Can't add empty named playlist.");
+                }
+
+                Context.Playlists.Add(
+                    new Playlist
+                    {
+                        Name = name,
+                        NumberOfTracks = 0,
+                        Length = 0
+                    }
+                );
+
+                await Context.SaveChangesAsync();
+
+                return Ok($"Playlist {name} added.");
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [Route("DeletePlaylist/{id}")]
+        [HttpDelete]
+        public async Task<ActionResult> DeletePlaylist(int id)
+        {
+            try
+            {
+                var playlist = Context.Playlists.Find(id);
+                if (playlist == null)
+                {
+                    return BadRequest($"No playlist with id {id} found.");
+                }
+
+                Context.Playlists.Remove(playlist);
+
+                await Context.SaveChangesAsync();
+
+                return Ok($"Playlist with id {id} removed.");
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
     }
 }

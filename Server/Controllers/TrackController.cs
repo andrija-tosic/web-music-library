@@ -28,11 +28,32 @@ namespace Controllers
                 {
                     track.Rating = rating;
 
+                    await Context.SaveChangesAsync();
+
                     return Ok($"Track rating with id {id} changed.");
                 }
-                else {
+                else
+                {
                     return BadRequest("No such track found");
                 }
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [Route("GetTracksFromRelease/{id}")]
+        [HttpGet]
+        public async Task<ActionResult> GetTracksFromRelease(int id)
+        {
+            try
+            {
+                var query = Context.Tracks.Where(t => t.Release.Id == id);
+
+                var tracks = await query.ToListAsync();
+
+                return Ok(tracks);
             }
             catch (System.Exception e)
             {

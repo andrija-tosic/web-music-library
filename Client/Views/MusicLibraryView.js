@@ -10,6 +10,11 @@ export class MusicLibraryView {
     }
 
     async renderPlaylistPicker(root) {
+        const prevContainer = document.querySelector(".playlistsContainer");
+        if (prevContainer) {
+            prevContainer.remove();
+        }
+
         const playlistsContainer = document.createElement("div");
         playlistsContainer.className = "playlistsContainer";
 
@@ -33,17 +38,25 @@ export class MusicLibraryView {
             playlistLabel.className = "playlistLabel";
             playlistLabel.innerText = playlist.name;
 
+            const playlistDeleteBtn = document.createElement("button");
+            playlistDeleteBtn.className = "playlistDeleteBtn";
+            playlistDeleteBtn.innerText = "Delete";
+            playlistDeleteBtn.id = playlist.id;
+            playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(e.target, root));
+
+            
             playlistComponent.appendChild(playlistLabel);
+            playlistComponent.appendChild(playlistDeleteBtn);
             playlistsContainer.appendChild(playlistComponent);
         });
 
         const playlistComponent = document.createElement("div");
         playlistComponent.className = "playlistComponent";
 
-        playlistComponent.addEventListener("click", e => this.renderAddPlaylistModal());
+        playlistComponent.addEventListener("click", e => this.renderAddPlaylistModal(root));
 
         const addPlaylist = document.createElement("div");
-        addPlaylist.className = "addPlaylist";
+        addPlaylist.className = "playlistImage";
         addPlaylist.innerHTML = "+";
         playlistComponent.appendChild(addPlaylist);
 
@@ -55,7 +68,7 @@ export class MusicLibraryView {
         playlistsContainer.appendChild(playlistComponent);
     }
 
-    async renderAddPlaylistModal() {
+    async renderAddPlaylistModal(root) {
         let modal = document.createElement("div");
         modal.className = "addPlaylistModal";
         document.body.appendChild(modal);
@@ -78,6 +91,8 @@ export class MusicLibraryView {
         newPlaylistNameInput.className = "newPlaylistNameInput";
         modalContent.appendChild(newPlaylistNameInput);
 
+        newPlaylistNameInput.focus();
+
         let btnAddPlaylist = document.createElement("button");
         btnAddPlaylist.className = "btnAddPlaylist";
         btnAddPlaylist.innerText = "Add";
@@ -85,13 +100,35 @@ export class MusicLibraryView {
 
         closeBtn.addEventListener("click", e => this.closeModal(modal));
 
-        btnAddPlaylist.addEventListener("click", e => {
-            this.closeModal();
-        })
+        btnAddPlaylist.addEventListener("click", e => this.onBtnAddPlaylistClick(newPlaylistNameInput.value, root, modal));
     }
 
-    async closeModal(modal) {
-        modal.innerHTML = "";
+    async onBtnDeletePlaylistClick(target, root) {
+        event.stopPropagation();
+        await this.musicLibrary.deletePlaylist(target.id);
+
+        console.log(target.parentElement);
+        target.parentElement.remove();
+    }
+
+    async onBtnAddPlaylistClick(name, root, modal) {
+        if (name == null
+            || name === undefined
+            || name == " "
+            || name == "") {
+
+            alert("Enter playlist name.");
+            return;
+        }
+
+        await this.musicLibrary.addPlaylist(name);
+
+        this.renderPlaylistPicker(root);
+
+        this.closeModal(modal);
+    }
+
+    closeModal(modal) {
         modal.remove();
     }
 
@@ -115,6 +152,7 @@ export class MusicLibraryView {
         let playlistTracks = await this.musicLibrary.loadPlaylistTracks(playlist.id);
 
         let tracksTable = document.createElement("table");
+        tracksTable.className = "tracksTable";
 
         const headerRow = document.createElement("tr");
 
@@ -130,31 +168,138 @@ export class MusicLibraryView {
         playlistTracks.forEach(track => {
             const tr = document.createElement("tr");
 
-            Object.keys(track).forEach(key => {
+            Object.keys(track).forEach((key, index) => {
+                const td = document.createElement("td");
+                td.className = "tdCircles";
+
                 if (track[key] !== null) {
-                    console.log(key, track[key]);
-                    const td = document.createElement("td");
-                    td.innerHTML = track[key];
-                    tr.appendChild(td);
+                    if (tracksTable.rows[0].cells[index].innerHTML == "Rating") {
+                        const rating = parseInt(track[key]);
+
+                        // TODO
+                        td.addEventListener("mouseleave", e => {
+                            const circles = Array.from(td.children);
+
+                            let anyCircleClicked = false;
+
+                            circles.forEach(circle => {
+                                if (circle.clicked) {
+                                    anyCircleClicked = true;
+                                }
+                            });
+
+                            if (!anyCircleClicked)
+                                this.colorRatingCircles(rating, td);
+
+                        });
+                        this.renderRatingCircles(track.id, td, rating);
+                    }
+                    else {
+                        td.innerHTML = track[key];
+                    }
                 }
+                tr.appendChild(td);
             });
 
             tracksTable.appendChild(tr);
         });
 
+        let trAddTrack = document.createElement("tr");
+
+        let td1 = document.createElement("td");
+        trAddTrack.appendChild(td1);
+
+        let tdNewTrackName = document.createElement("td");
+        let newTrackNameInput = document.createElement("input");
+        newTrackNameInput.placeholder = "New track name";
+        tdNewTrackName.appendChild(newTrackNameInput);
+
+        let tdArtist = document.createElement("td");
+        let tdArtistInput = document.createElement("input");
+        tdArtistInput.placeholder = "Artist name";
+        tdArtistInput.setAttribute("list", "artists");
+        tdArtist.appendChild(tdArtistInput);
+
+        let tdArtistDatalist = document.createElement("datalist");
+        tdArtist.appendChild(tdArtistDatalist);
+
+
+        let tdRelease = document.createElement("td");
+        let tdReleaseInput = document.createElement("input");
+        tdReleaseInput.placeholder = "Release name";
+        tdReleaseInput.setAttribute("list", "releases");
+        tdRelease.appendChild(tdReleaseInput);
+
+        let tdReleaseDatalist = document.createElement("datalist");
+        tdRelease.appendChild(tdReleaseDatalist);
+
+        let tdDuration = document.createElement("td");
+        let tdDurationInput = document.createElement("input");
+        tdDuration.appendChild(tdDurationInput);
+
+        let tdRating = document.createElement("td");
+        let tdRatingInput = document.createElement("input");
+        tdRating.appendChild(tdRatingInput);
+
+        trAddTrack.appendChild(td1);
+        trAddTrack.appendChild(tdNewTrackName);
+        trAddTrack.appendChild(tdArtist);
+        trAddTrack.appendChild(tdRelease);
+        trAddTrack.appendChild(tdDuration);
+        trAddTrack.appendChild(tdRating);
+
+        tracksTable.appendChild(trAddTrack);
+
         playlistSidebar.appendChild(tracksTable);
-
     }
 
-    async renderPlaylistForm(root) {
-        const playlistFormContainer = document.createElement("div");
-        playlistFormContainer.className = "playlistFormContainer";
-        root.appendChild(playlistFormContainer);
+    renderRatingCircles(trackId, root, rating) {
+        root.innerHTML = "";
+        for (let i = 0; i < 5; i++) {
 
+            let ratingCircle = document.createElement("div");
+            ratingCircle.id = `${i + 1}`;
+            if (i < rating)
+                ratingCircle.className = "ratingCircle";
+            else
+                ratingCircle.className = "emptyRatingCircle";
 
+            ratingCircle.addEventListener("click", e => {
+                e.target.clicked = true;
+                this.onRatingClick(trackId, root, e.target.id);
+            });
+
+            ratingCircle.addEventListener("mouseover", e => this.colorRatingCircles(e.target.id, root));
+
+            root.appendChild(ratingCircle);
+        }
     }
 
-    async render(root) {
+    async onRatingClick(trackId, root, rating) {
+        if (this.musicLibrary.changeTrackRating(trackId, rating)) {
+            this.colorRatingCircles(rating, root);
+        }
+    }
+
+    colorRatingCircles(rating, root) {
+        let circles = root.children;
+        for (let i = 0; i < 5; i++) {
+            if (i < rating)
+                circles[i].className = "ratingCircle";
+            else
+                circles[i].className = "emptyRatingCircle";
+        }
+    }
+
+    // renderPlaylistForm(root) {
+    //     const playlistFormContainer = document.createElement("div");
+    //     playlistFormContainer.className = "playlistFormContainer";
+    //     root.appendChild(playlistFormContainer);
+    // }
+
+    render(root) {
+        root.innerHTML = "";
+
         const header = document.createElement("h1");
         header.innerHTML = `${this.musicLibrary.owner}'s Music Library`;
         root.appendChild(header)

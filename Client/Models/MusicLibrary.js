@@ -19,8 +19,6 @@ export class MusicLibrary {
         data.forEach(playlist => {
             let p = new Playlist(playlist.id, playlist.name, playlist.tracksNum, playlist.length);
             playlists.push(p);
-
-            console.log(playlists, "fun", playlists.length)
         });
 
         return playlists;
@@ -34,16 +32,34 @@ export class MusicLibrary {
         let tracks = [];
 
         data.forEach(track => {
-            console.log(track.duration);
             tracks.push(new Track(track.id, track.number, track.name, track.artists, track.release, track.rating, track.duration));
         });
-
-        console.log(tracks, "loaded playlist tracks");
 
         return tracks;
     }
 
     async addPlaylist(name) {
-        const res = await fetch("https://localhost:5001/Track")
+        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${name}`, {
+            method: "POST"
+        });
+
+        return await res.text();
     }
+
+    async deletePlaylist(id) {
+        const res = await fetch(`https://localhost:5001/Playlist/DeletePlaylist/${id}`, {
+            method: "DELETE"
+        });
+
+        return res.ok;
+    }
+
+    async changeTrackRating(trackId, rating) {
+        const res = await fetch(`https://localhost:5001/Track/ChangeRating/${trackId}/${rating}`, {
+            method: "PATCH"
+        });
+       
+        return res.ok;
+    }
+
 }
