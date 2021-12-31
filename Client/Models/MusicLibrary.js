@@ -7,21 +7,25 @@ import { Track } from "../Models/Track.js"
 export class MusicLibrary {
     constructor(owner) {
         this.owner = owner;
+        this.playlists = [];
     }
 
     async getPlaylists() {
-        let playlists = [];
 
         const res = await fetch("https://localhost:5001/Playlist/GetPlaylists");
 
         const data = await res.json();
 
+        this.playlists = [];
+
+        console.log(data);
+
         data.forEach(playlist => {
-            let p = new Playlist(playlist.id, playlist.name, playlist.tracksNum, playlist.length);
-            playlists.push(p);
+            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length);
+            this.playlists.push(p);
         });
 
-        return playlists;
+        return this.playlists;
     }
 
     async loadPlaylistTracks(id) {
@@ -29,21 +33,37 @@ export class MusicLibrary {
 
         const data = await res.json();
 
-        let tracks = [];
+        const playlist = this.playlists.filter(p => p.id == id)[0];
+
+        playlist.tracks = [];
 
         data.forEach(track => {
-            tracks.push(new Track(track.id, track.number, track.name, track.artists, track.release, track.rating, track.duration));
+            console.log(track);
+            playlist.tracks.push(new Track(track.id, track.number, track.name, track.artists, track.release, track.rating, track.duration));
         });
 
-        return tracks;
+        return playlist;
     }
 
     async addPlaylist(name) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${name}`, {
-            method: "POST"
+        const playlist = new Playlist(0, name, 0, 0, null);
+        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(playlist)
         });
 
-        return await res.text();
+        return await res.ok;
+    }
+
+    async renamePlaylist(id, name) {
+        const res = await fetch(`https://localhost:5001/Playlist/RenamePlaylist/${id}/${name}`, {
+            method: "PATCH"
+        });
+
+        return res.ok;
     }
 
     async deletePlaylist(id) {
@@ -62,4 +82,16 @@ export class MusicLibrary {
         return res.ok;
     }
 
+    async matchArtists(artistName) {
+        const res = await fetch(`https://localhost:5001/Artist/MatchArtists/${artistName}`, {
+            method: "GET"
+        });
+
+        if (res.ok) {
+            let artists = await res.json();
+            return artists;
+        }
+        else
+            return null;
+    }
 }

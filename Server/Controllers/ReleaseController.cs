@@ -42,7 +42,7 @@ namespace Controllers
         }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
     }
 }
     }

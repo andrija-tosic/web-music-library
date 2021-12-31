@@ -10,6 +10,7 @@
 }
 
 .playlistsContainer {
+    order: 0;
     background-color: lightcyan;
     display: flex;
     flex: 50%;
@@ -19,6 +20,7 @@
 }
 
 .playlistSidebar {
+    order: 1;
     height: 100%;
     flex: 50%;
     background-color: aliceblue;

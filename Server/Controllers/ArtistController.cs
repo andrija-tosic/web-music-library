@@ -29,21 +29,24 @@ namespace Controllers
                     return BadRequest("String in invalid format");
                 }
 
-                return Ok(
-                    await Context.Artists
-                    .Select(a =>
+                var matches = await Context.Artists.Select(a =>
                     new
                     {
                         a.Id,
                         a.ArtistName
                     })
                     .Where(a => a.ArtistName.Contains(match))
-                    .ToListAsync()
-                );
+                    .ToListAsync();
+
+                if (matches.Count == 0) {
+                    return NotFound($"No such artists with match: {match}");
+                }
+
+                return Ok(matches);
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
     }

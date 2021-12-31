@@ -7,6 +7,57 @@ import { MusicLibrary } from "../Models/MusicLibrary.js"
 export class MusicLibraryView {
     constructor(musicLibrary) {
         this.musicLibrary = musicLibrary;
+        this.container = null;
+    }
+
+    //#region helper functions
+
+    formatTime(timeInSeconds) {
+        const hours = Math.floor((timeInSeconds / 3600));
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}min`;
+        }
+        else {
+            return `${minutes}min ${seconds}s`;
+        }
+    }
+
+    formatMilitaryTime(timeInSeconds) {
+        const hours = Math.floor((timeInSeconds / 3600));
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        if (hours > 0) {
+            if (seconds === 0)
+                return `${hours}:${minutes}:${seconds}`;
+        }
+        else {
+            if (seconds === 0)
+                return `${minutes}:00`;
+            else
+                return `${minutes}:${seconds}`;
+        }
+    }
+
+    //#endregion
+
+    //#region render functions
+
+    async render(root) {
+        root.innerHTML = "";
+
+        const header = document.createElement("h1");
+        header.innerHTML = `muzicka biblioteka ${this.musicLibrary.owner}`;
+        root.appendChild(header)
+
+        const musicLibraryContainer = document.createElement("div");
+        musicLibraryContainer.className = "musicLibraryContainer";
+        this.container = musicLibraryContainer;
+        root.appendChild(this.container);
+
+        await this.renderPlaylistPicker(this.container);
     }
 
     async renderPlaylistPicker(root) {
@@ -20,9 +71,9 @@ export class MusicLibraryView {
 
         root.appendChild(playlistsContainer);
 
-        let playlists = await this.musicLibrary.getPlaylists();
+        await this.musicLibrary.getPlaylists();
 
-        playlists.forEach(playlist => {
+        this.musicLibrary.playlists.forEach(playlist => {
 
             const playlistComponent = document.createElement("div");
             playlistComponent.className = "playlistComponent";
@@ -38,14 +89,24 @@ export class MusicLibraryView {
             playlistLabel.className = "playlistLabel";
             playlistLabel.innerText = playlist.name;
 
+            const playlistRenameBtn = document.createElement("button");
+            playlistRenameBtn.className = "playlistRenameBtn";
+            playlistRenameBtn.innerText = "Preimenuj";
+            playlistRenameBtn.id = playlist.id;
+            playlistRenameBtn.addEventListener("click", e => {
+                e.stopPropagation();
+                this.renderInputModal(playlist, root, "Novi naziv plejliste: ", "Preimenuj");
+            });
+
             const playlistDeleteBtn = document.createElement("button");
             playlistDeleteBtn.className = "playlistDeleteBtn";
-            playlistDeleteBtn.innerText = "Delete";
+            playlistDeleteBtn.innerText = "Obrisi";
             playlistDeleteBtn.id = playlist.id;
-            playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(e.target, root));
+            playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(playlist, e.target));
 
-            
+
             playlistComponent.appendChild(playlistLabel);
+            playlistComponent.appendChild(playlistRenameBtn);
             playlistComponent.appendChild(playlistDeleteBtn);
             playlistsContainer.appendChild(playlistComponent);
         });
@@ -53,7 +114,10 @@ export class MusicLibraryView {
         const playlistComponent = document.createElement("div");
         playlistComponent.className = "playlistComponent";
 
-        playlistComponent.addEventListener("click", e => this.renderAddPlaylistModal(root));
+        playlistComponent.addEventListener("click", e => {
+            e.stopPropagation();
+            this.renderInputModal(null, root, "Naziv nove plejliste: ", "Dodaj");
+        });
 
         const addPlaylist = document.createElement("div");
         addPlaylist.className = "playlistImage";
@@ -62,13 +126,13 @@ export class MusicLibraryView {
 
         const playlistLabel = document.createElement("label");
         playlistLabel.className = "playlistLabel";
-        playlistLabel.innerText = "Add new playlist";
+        playlistLabel.innerText = "Dodaj novu plejlistu";
 
         playlistComponent.appendChild(playlistLabel);
         playlistsContainer.appendChild(playlistComponent);
     }
 
-    async renderAddPlaylistModal(root) {
+    async renderInputModal(playlist, root, text, action) {
         let modal = document.createElement("div");
         modal.className = "addPlaylistModal";
         document.body.appendChild(modal);
@@ -84,52 +148,35 @@ export class MusicLibraryView {
 
         let modalText = document.createElement("label");
         modalText.className = "modalText";
-        modalText.innerHTML = "Enter new playlist name:";
+        modalText.innerHTML = text;
         modalContent.appendChild(modalText);
 
-        let newPlaylistNameInput = document.createElement("input");
-        newPlaylistNameInput.className = "newPlaylistNameInput";
-        modalContent.appendChild(newPlaylistNameInput);
+        let modalInput = document.createElement("input");
+        modalInput.className = "modalInput";
+        modalContent.appendChild(modalInput);
 
-        newPlaylistNameInput.focus();
+        modalInput.focus();
 
-        let btnAddPlaylist = document.createElement("button");
-        btnAddPlaylist.className = "btnAddPlaylist";
-        btnAddPlaylist.innerText = "Add";
-        modalContent.appendChild(btnAddPlaylist);
+        let btnAction = document.createElement("button");
+        btnAction.className = "btnAction";
+        btnAction.innerText = action;
+        modalContent.appendChild(btnAction);
 
         closeBtn.addEventListener("click", e => this.closeModal(modal));
 
-        btnAddPlaylist.addEventListener("click", e => this.onBtnAddPlaylistClick(newPlaylistNameInput.value, root, modal));
-    }
-
-    async onBtnDeletePlaylistClick(target, root) {
-        event.stopPropagation();
-        await this.musicLibrary.deletePlaylist(target.id);
-
-        console.log(target.parentElement);
-        target.parentElement.remove();
-    }
-
-    async onBtnAddPlaylistClick(name, root, modal) {
-        if (name == null
-            || name === undefined
-            || name == " "
-            || name == "") {
-
-            alert("Enter playlist name.");
-            return;
-        }
-
-        await this.musicLibrary.addPlaylist(name);
-
-        this.renderPlaylistPicker(root);
-
-        this.closeModal(modal);
-    }
-
-    closeModal(modal) {
-        modal.remove();
+        btnAction.addEventListener("click", async (e) => {
+            let actionSucceeded = false;
+            if (action === "Dodaj") {
+                actionSucceeded = await this.onBtnAddPlaylistClick(modalInput.value);
+            }
+            else if (action === "Preimenuj") {
+                actionSucceeded = await this.onBtnRenamePlaylistClick(playlist, modalInput.value);
+            }
+            if (actionSucceeded) {
+                this.closeModal(modal);
+                await this.renderPlaylistPicker(root);
+            }
+        });
     }
 
     async renderPlaylistSidebar(root, playlist) {
@@ -144,19 +191,55 @@ export class MusicLibraryView {
         }
         root.appendChild(playlistSidebar);
 
+        let newTrackNameInput = document.createElement("input");
+        newTrackNameInput.placeholder = "Pesma...";
+
+        let artistInput = document.createElement("input");
+        artistInput.placeholder = "Izvodjac...";
+        artistInput.setAttribute("list", "artists");
+        let artistDatalist = document.createElement("datalist");
+        artistDatalist.id = "artists";
+
+        artistInput.addEventListener("keyup", async (e) => {
+            if (artistInput.value == "")
+                return;
+            
+            let artists = Array.from(await this.artistInputHandler(artistInput.value));
+            artistDatalist.innerHTML = "";
+            artists.forEach(artist => {
+                let option = document.createElement("option");
+                option.value = artist.artistName;
+                artistDatalist.appendChild(option);
+            })
+        })
+
+
+        let releaseInput = document.createElement("input");
+        releaseInput.placeholder = "Album...";
+        releaseInput.setAttribute("list", "releases");
+
+        let ratingInput = document.createElement("input");
+        ratingInput.placeholder = "Ocena";        
+
+        playlistSidebar.appendChild(artistInput);
+        playlistSidebar.appendChild(artistDatalist);
+        playlistSidebar.appendChild(releaseInput);
+        playlistSidebar.appendChild(newTrackNameInput);
+        playlistSidebar.appendChild(ratingInput);
+
         let playlistTitle = document.createElement("h1");
         playlistTitle.className = "playlistTitle";
-        playlistTitle.textContent = playlist.name;
-        playlistSidebar.appendChild(playlistTitle);
 
-        let playlistTracks = await this.musicLibrary.loadPlaylistTracks(playlist.id);
+        const lengthAsString = this.formatTime(playlist.length);
+        playlistTitle.textContent = `${playlist.name} (${playlist.numberOfTracks} pesme, ${lengthAsString} ukupno)`;
+        playlistSidebar.appendChild(playlistTitle);
 
         let tracksTable = document.createElement("table");
         tracksTable.className = "tracksTable";
 
         const headerRow = document.createElement("tr");
 
-        let headers = ["Track number", "Track name", "Artist", "Release", "Rating", "Duration"];
+        let headers = ["Redni broj", "Naziv", "Izvodjac(i)", "Album", "Ocena", "Trajanje"];
         headers.forEach(col => {
             let th = document.createElement("th");
             th.innerHTML = col;
@@ -165,119 +248,59 @@ export class MusicLibraryView {
 
         tracksTable.appendChild(headerRow);
 
+
+        playlist = await this.musicLibrary.loadPlaylistTracks(playlist.id);
+        const playlistTracks = playlist.tracks;
         playlistTracks.forEach(track => {
             const tr = document.createElement("tr");
 
-            Object.keys(track).forEach((key, index) => {
-                const td = document.createElement("td");
-                td.className = "tdCircles";
+            let td = document.createElement("td");
+            td.innerHTML = track.number;
+            tr.appendChild(td);
 
-                if (track[key] !== null) {
-                    if (tracksTable.rows[0].cells[index].innerHTML == "Rating") {
-                        const rating = parseInt(track[key]);
+            td = document.createElement("td");
+            td.innerHTML = track.name;
+            tr.appendChild(td);
 
-                        // TODO
-                        td.addEventListener("mouseleave", e => {
-                            const circles = Array.from(td.children);
+            td = document.createElement("td");
+            td.innerHTML = track.artists;
+            tr.appendChild(td);
 
-                            let anyCircleClicked = false;
+            td = document.createElement("td");
+            td.innerHTML = track.release;
+            tr.appendChild(td);
 
-                            circles.forEach(circle => {
-                                if (circle.clicked) {
-                                    anyCircleClicked = true;
-                                }
-                            });
+            td = document.createElement("td");
+            td.className = "tdCircles";
+            this.appendRatingCircles(track.id, td);
+            this.colorRatingCircles(track.rating, td);
+            tr.appendChild(td);
 
-                            if (!anyCircleClicked)
-                                this.colorRatingCircles(rating, td);
-
-                        });
-                        this.renderRatingCircles(track.id, td, rating);
-                    }
-                    else {
-                        td.innerHTML = track[key];
-                    }
-                }
-                tr.appendChild(td);
-            });
+            td = document.createElement("td");
+            td.innerHTML = this.formatMilitaryTime(track.duration);
+            tr.appendChild(td);
 
             tracksTable.appendChild(tr);
         });
-
-        let trAddTrack = document.createElement("tr");
-
-        let td1 = document.createElement("td");
-        trAddTrack.appendChild(td1);
-
-        let tdNewTrackName = document.createElement("td");
-        let newTrackNameInput = document.createElement("input");
-        newTrackNameInput.placeholder = "New track name";
-        tdNewTrackName.appendChild(newTrackNameInput);
-
-        let tdArtist = document.createElement("td");
-        let tdArtistInput = document.createElement("input");
-        tdArtistInput.placeholder = "Artist name";
-        tdArtistInput.setAttribute("list", "artists");
-        tdArtist.appendChild(tdArtistInput);
-
-        let tdArtistDatalist = document.createElement("datalist");
-        tdArtist.appendChild(tdArtistDatalist);
-
-
-        let tdRelease = document.createElement("td");
-        let tdReleaseInput = document.createElement("input");
-        tdReleaseInput.placeholder = "Release name";
-        tdReleaseInput.setAttribute("list", "releases");
-        tdRelease.appendChild(tdReleaseInput);
-
-        let tdReleaseDatalist = document.createElement("datalist");
-        tdRelease.appendChild(tdReleaseDatalist);
-
-        let tdDuration = document.createElement("td");
-        let tdDurationInput = document.createElement("input");
-        tdDuration.appendChild(tdDurationInput);
-
-        let tdRating = document.createElement("td");
-        let tdRatingInput = document.createElement("input");
-        tdRating.appendChild(tdRatingInput);
-
-        trAddTrack.appendChild(td1);
-        trAddTrack.appendChild(tdNewTrackName);
-        trAddTrack.appendChild(tdArtist);
-        trAddTrack.appendChild(tdRelease);
-        trAddTrack.appendChild(tdDuration);
-        trAddTrack.appendChild(tdRating);
-
-        tracksTable.appendChild(trAddTrack);
-
         playlistSidebar.appendChild(tracksTable);
     }
 
-    renderRatingCircles(trackId, root, rating) {
-        root.innerHTML = "";
+    closeModal(modal) {
+        modal.remove();
+    }
+
+    appendRatingCircles(trackId, root) {
         for (let i = 0; i < 5; i++) {
 
             let ratingCircle = document.createElement("div");
             ratingCircle.id = `${i + 1}`;
-            if (i < rating)
-                ratingCircle.className = "ratingCircle";
-            else
-                ratingCircle.className = "emptyRatingCircle";
 
             ratingCircle.addEventListener("click", e => {
                 e.target.clicked = true;
                 this.onRatingClick(trackId, root, e.target.id);
             });
 
-            ratingCircle.addEventListener("mouseover", e => this.colorRatingCircles(e.target.id, root));
-
             root.appendChild(ratingCircle);
-        }
-    }
-
-    async onRatingClick(trackId, root, rating) {
-        if (this.musicLibrary.changeTrackRating(trackId, rating)) {
-            this.colorRatingCircles(rating, root);
         }
     }
 
@@ -291,25 +314,69 @@ export class MusicLibraryView {
         }
     }
 
-    // renderPlaylistForm(root) {
-    //     const playlistFormContainer = document.createElement("div");
-    //     playlistFormContainer.className = "playlistFormContainer";
-    //     root.appendChild(playlistFormContainer);
-    // }
+    //#endregion
 
-    render(root) {
-        root.innerHTML = "";
+    //#region event handlers
 
-        const header = document.createElement("h1");
-        header.innerHTML = `${this.musicLibrary.owner}'s Music Library`;
-        root.appendChild(header)
+    async onBtnRenamePlaylistClick(playlist, name) {
+        if (name == null
+            || name === undefined
+            || name == " "
+            || name == "") {
 
+            alert("Unesite novi naziv plejliste.");
+            return false;
+        }
 
-        const musicLibraryContainer = document.createElement("div");
-        musicLibraryContainer.className = "musicLibraryContainer";
-        root.appendChild(musicLibraryContainer);
+        if (name == playlist.name) {
+            alert("Unesite drugaciji naziv od postojeceg.");
+            return false;
+        }
 
-        this.renderPlaylistPicker(musicLibraryContainer);
+        if (await this.musicLibrary.renamePlaylist(playlist.id, name)) {
+            await this.renderPlaylistPicker(this.container);
+            playlist.name = name;
+            await this.renderPlaylistSidebar(this.container, playlist);
 
+            return true;
+        }
     }
+
+    async onBtnDeletePlaylistClick(playlist, target) {
+        event.stopPropagation();
+        if (await this.musicLibrary.deletePlaylist(playlist.id)) {
+            console.log(target.parentElement);
+            const playlistComponent = target.parentElement;
+            playlistComponent.remove();
+        }
+    }
+
+    async onBtnAddPlaylistClick(name) {
+        if (name == null
+            || name === undefined
+            || name == " "
+            || name == "") {
+
+            alert("Unesite naziv nove plejliste.");
+            return false;
+        }
+
+        return await this.musicLibrary.addPlaylist(name);
+    }
+
+    async onRatingClick(trackId, root, rating) {
+        if (this.musicLibrary.changeTrackRating(trackId, rating)) {
+            this.colorRatingCircles(rating, root);
+        }
+    }
+
+    async artistInputHandler(artistName) {
+        let artists = await this.musicLibrary.matchArtists(artistName) 
+
+        if (artists != null) {
+            return artists;
+        }
+    }
+
+    //#endregion
 }

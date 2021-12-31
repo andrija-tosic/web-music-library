@@ -34,12 +34,12 @@ namespace Controllers
                 }
                 else
                 {
-                    return BadRequest("No such track found");
+                    return NotFound("No such track found");
                 }
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
@@ -53,11 +53,14 @@ namespace Controllers
 
                 var tracks = await query.ToListAsync();
 
+                if (tracks.Count == 0)
+                    return NotFound("No tracks in this release");
+
                 return Ok(tracks);
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 

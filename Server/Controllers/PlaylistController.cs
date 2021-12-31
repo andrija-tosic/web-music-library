@@ -26,7 +26,7 @@ namespace Controllers
             {
                 if (Context.Playlists.Count() == 0)
                 {
-                    return BadRequest("No playlists were found.");
+                    return NotFound("No playlists were found.");
                 }
 
                 var playlists = await Context.Playlists.Select(p =>
@@ -42,7 +42,7 @@ namespace Controllers
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
@@ -67,25 +67,27 @@ namespace Controllers
                         Name = pt.Track.Name,
                         Artists = pt.Track.Release.Artists.Select(a => a.ArtistName),
                         Release = pt.Track.Release.Name,
-                        Duration = pt.Track.Duration,
                         Rating = pt.Track.Rating,
+                        Duration = pt.Track.Duration,
                     }).ToListAsync();
+
+                objects.Sort((o1, o2) => o1.Number - o2.Number);
 
                 return Ok(objects);
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
-        [Route("AddPlaylist/{name}")]
+        [Route("AddPlaylist")]
         [HttpPost]
-        public async Task<ActionResult> AddPlaylist(string name)
+        public async Task<ActionResult> AddPlaylist(Playlist playlist)
         {
             try
             {
-                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrEmpty(playlist.Name) || string.IsNullOrWhiteSpace(playlist.Name))
                 {
                     return BadRequest("Can't add empty named playlist.");
                 }
@@ -93,7 +95,7 @@ namespace Controllers
                 Context.Playlists.Add(
                     new Playlist
                     {
-                        Name = name,
+                        Name = playlist.Name,
                         NumberOfTracks = 0,
                         Length = 0
                     }
@@ -101,11 +103,12 @@ namespace Controllers
 
                 await Context.SaveChangesAsync();
 
-                return Ok($"Playlist {name} added.");
+                return Ok();
+                //return CreatedAtRoute(nameof(AddPlaylist), playlist,  $"Playlist {playlist.Name} added.");
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
@@ -118,20 +121,63 @@ namespace Controllers
                 var playlist = Context.Playlists.Find(id);
                 if (playlist == null)
                 {
-                    return BadRequest($"No playlist with id {id} found.");
+                    return NotFound($"No playlist with id {id} found.");
                 }
+
+                var playlistReferences = await Context.PlaylistTracks.Where(pt => pt.Playlist.Id == id).ToListAsync();
+
+                Context.PlaylistTracks.RemoveRange(playlistReferences);
 
                 Context.Playlists.Remove(playlist);
 
                 await Context.SaveChangesAsync();
 
-                return Ok($"Playlist with id {id} removed.");
+                return Ok($"Playlist {playlist} and references {playlistReferences.ToString()} removed.");
             }
             catch (System.Exception e)
             {
-                return BadRequest(e.Message);
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
+        [Route("RenamePlaylist/{id}/{name}")]
+        [HttpPatch]
+        public async Task<ActionResult> RenamePlaylist(int id, string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                {
+                    return BadRequest("Invalid and empty string.");
+                }
+
+                var playlist = await Context.Playlists.FindAsync(id);
+                if (playlist.Name != name)
+                {
+                    playlist.Name = name;
+                    await Context.SaveChangesAsync();
+                    return Ok($"Playlist name with id {id} changed to {name}.");
+                }
+                else
+                {
+                    return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status304NotModified, "Playlist name is the same.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        private async void RecalculatePlaylistLength(Playlist playlist)
+        {
+            var tracks = playlist.PlaylistTracks.Select(pt => pt.Track.Duration);
+
+            int newLength = tracks.Sum(duration => duration ?? 0);
+
+            playlist.Length = newLength;
+
+            await Context.SaveChangesAsync();
+        }
     }
 }
