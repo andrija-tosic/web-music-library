@@ -1,3 +1,5 @@
+import {Track} from "../Models/Track.js";
+
 export class Playlist {
     constructor(id, name, numberOfTracks, length, tracks) {
         this.id = id;
@@ -8,7 +10,7 @@ export class Playlist {
     }
 
     async loadPlaylistTracks() {
-        const res = await fetch(`https://localhost:5001/Playlist/GetTracksFromPlaylist/${playlist.id}`);
+        const res = await fetch(`https://localhost:5001/Playlist/GetTracksFromPlaylist/${this.id}`);
 
         const data = await res.json();
 
@@ -38,4 +40,19 @@ export class Playlist {
             return false;
         }
     }
+
+    async removeTrackFromPlaylist(track) {
+        const res = await fetch(`https://localhost:5001/Playlist/RemoveTrackFromPlaylist/${track.number}/${this.id}`, {
+            method: "PATCH"
+        });
+
+        if (res.ok) {
+            this.tracks.pop(track);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
 }

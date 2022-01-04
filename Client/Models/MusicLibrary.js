@@ -128,7 +128,6 @@ export class MusicLibrary {
 
             release.tracks = [];
             tracks.forEach(track => {
-                console.log(track);
                 release.tracks.push(new Track(track.id, track.trackNumber, track.name, artist, release, track.rating, track.duration));
             });
 
@@ -158,17 +157,4 @@ export class MusicLibrary {
         }
     }
 
-    async removeTrackFromPlaylist(track, playlist) {
-        const res = await fetch(`https://localhost:5001/Playlist/RemoveTrackFromPlaylist/${track.number}/${playlist.id}`, {
-            method: "PATCH"
-        });
-
-        if (res.ok) {
-            playlist.tracks.pop(track);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 }

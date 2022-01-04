@@ -1,7 +1,10 @@
+import { PlaylistView } from "../Views/PlaylistView.js";
+
 export class MusicLibraryView {
     constructor(musicLibrary) {
         this.musicLibrary = musicLibrary;
         this.container = null;
+        this.playlistView = new PlaylistView();
     }
 
     //#region helper functions
@@ -43,7 +46,7 @@ export class MusicLibraryView {
         root.innerHTML = "";
 
         const header = document.createElement("h1");
-        header.innerHTML = `muzicka biblioteka ${this.musicLibrary.owner}`;
+        header.innerHTML = `Muzicka biblioteka ${this.musicLibrary.owner}`;
         root.appendChild(header)
 
         const musicLibraryContainer = document.createElement("div");
@@ -142,25 +145,31 @@ export class MusicLibraryView {
         closeBtn.innerHTML = "&times;"
         modalContent.appendChild(closeBtn);
 
+        let modalForm = document.createElement("form");
+        modalForm.className = "modalForm";
+
         let modalText = document.createElement("label");
         modalText.className = "modalText";
         modalText.innerHTML = text;
-        modalContent.appendChild(modalText);
+        modalForm.appendChild(modalText);
 
         let modalInput = document.createElement("input");
         modalInput.className = "modalInput";
-        modalContent.appendChild(modalInput);
+        modalForm.appendChild(modalInput);
 
         modalInput.focus();
 
         let btnAction = document.createElement("button");
         btnAction.className = "btnAction";
         btnAction.innerText = action;
-        modalContent.appendChild(btnAction);
+        modalForm.appendChild(btnAction);
 
-        closeBtn.addEventListener("click", e => this.closeModal(modal));
+        closeBtn.addEventListener("click", e => {
+            this.closeModal(modal);
+        });
 
         btnAction.addEventListener("click", async (e) => {
+            e.preventDefault();
             let actionSucceeded = false;
             if (action === "Dodaj") {
                 actionSucceeded = await this.onBtnAddPlaylistClick(modalInput.value);
@@ -173,6 +182,8 @@ export class MusicLibraryView {
                 await this.renderPlaylistPicker(root);
             }
         });
+
+        modalContent.appendChild(modalForm);
     }
 
     async renderPlaylistSidebar(root, playlist) {
@@ -274,7 +285,7 @@ export class MusicLibraryView {
             e.preventDefault();
             const selectedIndex = trackSelect.options.selectedIndex;
             const trackToAppend = await this.onBtnAddTrackClick(trackSelect.options[selectedIndex].value, playlist);
-            this.appendTrackToPlaylist(playlistTitle, tracksTable, trackToAppend, playlist);
+            this.appendTrackToPlaylist(playlistTitle, tbody, trackToAppend, playlist);
         });
 
         addTrackForm.appendChild(artistSelectLabel);
@@ -297,7 +308,10 @@ export class MusicLibraryView {
         let tracksTable = document.createElement("table");
         tracksTable.className = "tracksTable";
 
+        const header = document.createElement("thead");
+
         const headerRow = document.createElement("tr");
+        header.appendChild(headerRow);
 
         let headers = ["Redni broj", "Naziv", "Izvodjac(i)", "Album", "Ocena", "Trajanje"];
         headers.forEach(col => {
@@ -306,14 +320,17 @@ export class MusicLibraryView {
             headerRow.appendChild(th);
         });
 
-        tracksTable.appendChild(headerRow);
+        tracksTable.appendChild(header);
+        
+        const tbody = document.createElement("tbody");
+        tracksTable.appendChild(tbody);
 
         const playlistTracks = await playlist.loadPlaylistTracks();
-        playlistTracks.forEach(track => this.appendTrackToPlaylist(playlistTitle, tracksTable, track, playlist));
+        playlistTracks.forEach(track => this.appendTrackToPlaylist(playlistTitle, tbody, track, playlist));
         playlistSidebar.appendChild(tracksTable);
     }
 
-    appendTrackToPlaylist(playlistTitle, tracksTable, track, playlist) {
+    appendTrackToPlaylist(playlistTitle, tbody, track, playlist) {
         const tr = document.createElement("tr");
 
         let td = document.createElement("td");
@@ -336,7 +353,7 @@ export class MusicLibraryView {
         td.className = "tdCircles";
         td.id = `${track.id}`;
         this.appendRatingCircles(track, td);
-        this.colorRatingCircles(track, tracksTable);
+        this.colorRatingCircles(track, tbody);
         tr.appendChild(td);
         
         td = document.createElement("td");
@@ -349,15 +366,20 @@ export class MusicLibraryView {
         td.appendChild(removeTrackBtn);
         tr.appendChild(td);
         
-        tracksTable.appendChild(tr);
+        tbody.appendChild(tr);
         playlistTitle.innerHTML = `${playlist.name} (${playlist.numberOfTracks} pesme, ${this.formatTime(playlist.length)} ukupno)`;
 
         removeTrackBtn.addEventListener("click", async () => {
-            if (await this.onBtnRemoveTrack(track, playlist)) {
-                await this.musicLibrary.loadPlaylistTracks(playlist);
+            if (await this.onBtnRemoveTrack(track, playlist) == true) {
+                await playlist.loadPlaylistTracks();
 
-                tracksTable.innerHTML = "";
-                playlist.tracks.forEach(track => this.appendTrackToPlaylist(playlistTitle, tracksTable, track, playlist));
+                tbody.innerHTML = "";
+
+                if (playlist.tracks.length == 0) {
+                    playlistTitle.innerHTML = `${playlist.name} (0 pesama, ${this.formatTime(0)} ukupno)`;
+                }
+
+                playlist.tracks.forEach(track => this.appendTrackToPlaylist(playlistTitle, tbody, track, playlist));
             }
         });
     }
@@ -383,7 +405,7 @@ export class MusicLibraryView {
         let tdRatings = Array.from(root.querySelectorAll(".tdCircles"));
         tdRatings.forEach(tdRating => {
             if (tdRating.id == track.id) {
-                console.log(tdRating, track);
+                console.log(tdRating);
                 let circles = tdRating.children;
                 for (let i = 0; i < 5; i++) {
                     if (i < track.rating)
@@ -423,10 +445,10 @@ export class MusicLibraryView {
         }
     }
 
-    async onBtnDeletePlaylistClick(playlist, target) {
+    async onBtnDeletePlaylistClick(playlist, button) {
         event.stopPropagation();
         if (await this.musicLibrary.deletePlaylist(playlist)) {
-            const playlistComponent = target.parentElement;
+            const playlistComponent = button.parentElement;
             playlistComponent.remove();
         }
     }
@@ -465,7 +487,7 @@ export class MusicLibraryView {
     }
 
     async onBtnRemoveTrack(track, playlist) {
-        return this.musicLibrary.removeTrackFromPlaylist(track, playlist);
+        return playlist.removeTrackFromPlaylist(track);
     }
 
     //#endregion
