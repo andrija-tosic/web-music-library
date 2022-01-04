@@ -1,5 +1,6 @@
 export class Release {
-    constructor(name, date, type, duration, tracks) {
+    constructor(id, name, date, type, duration, tracks) {
+        this.id = id;
         this.name = name;
         this.date = date;
         this.type = type;

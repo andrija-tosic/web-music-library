@@ -148,3 +148,8 @@ input {
     box-sizing:border-box;
     width: 100%;
 }
+
+.addTrackForm {
+    display: flex;
+    flex-direction: column;
+}

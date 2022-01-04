@@ -49,12 +49,12 @@ namespace Controllers
         {
             try
             {
-                var query = Context.Tracks.Where(t => t.Release.Id == id);
-
-                var tracks = await query.ToListAsync();
+                var tracks = await Context.Tracks.Where(t => t.Release.Id == id).ToListAsync();
 
                 if (tracks.Count == 0)
                     return NotFound("No tracks in this release");
+
+                tracks.Sort((t1, t2) => t1.TrackNumber - t2.TrackNumber);
 
                 return Ok(tracks);
             }

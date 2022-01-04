@@ -38,11 +38,37 @@ namespace Controllers
                     .Where(a => a.ArtistName.Contains(match))
                     .ToListAsync();
 
-                if (matches.Count == 0) {
+                if (matches.Count == 0)
+                {
                     return NotFound($"No such artists with match: {match}");
                 }
 
                 return Ok(matches);
+            }
+            catch (System.Exception e)
+            {
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [Route("GetArtists")]
+        [HttpGet]
+        public async Task<ActionResult> GetArtists()
+        {
+            try
+            {
+                var artists = await Context.Artists.Select(a => 
+                new
+                {
+                    a.Id,
+                    a.ArtistName
+                })
+                .ToListAsync();
+
+                if (artists.Count == 0)
+                    return NotFound("No artists in database");
+                
+                return Ok(artists);
             }
             catch (System.Exception e)
             {

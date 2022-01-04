@@ -8,4 +8,19 @@ export class Track {
         this.rating = rating;
         this.number = number;
     }
+
+    async changeTrackRating(newRating) {
+        console.log(this, newRating);
+        const res = await fetch(`https://localhost:5001/Track/ChangeRating/${this.id}/${newRating}`, {
+            method: "PATCH"
+        });
+
+        if (res.ok) {
+            this.rating = newRating;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
