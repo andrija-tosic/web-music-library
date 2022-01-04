@@ -67,6 +67,8 @@ namespace Controllers
 
                 if (artists.Count == 0)
                     return NotFound("No artists in database");
+
+                artists.Sort((a1, a2) => a1.ArtistName.CompareTo(a2.ArtistName));
                 
                 return Ok(artists);
             }

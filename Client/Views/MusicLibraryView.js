@@ -7,42 +7,7 @@ export class MusicLibraryView {
         this.playlistView = null;
     }
 
-    //#region helper functions
-
-    formatTime(timeInSeconds) {
-        const hours = Math.floor((timeInSeconds / 3600));
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = Math.floor(timeInSeconds % 60);
-
-        if (hours > 0) {
-            return `${hours}h ${minutes}min`;
-        }
-        else {
-            return `${minutes}min ${seconds}s`;
-        }
-    }
-
-    formatMilitaryTime(timeInSeconds) {
-        const hours = Math.floor((timeInSeconds / 3600));
-        const minutes = Math.floor(timeInSeconds / 60);
-        const seconds = Math.floor(timeInSeconds % 60);
-        if (hours > 0) {
-            if (seconds === 0)
-                return `${hours}:${minutes}:${seconds}`;
-        }
-        else {
-            if (seconds === 0)
-                return `${minutes}:00`;
-            else
-                return `${minutes}:${seconds}`;
-        }
-    }
-
-    //#endregion
-
-    //#region render functions
-
-    async render(root) {
+    async initRender(root) {
         root.innerHTML = "";
 
         const header = document.createElement("h1");
@@ -54,7 +19,7 @@ export class MusicLibraryView {
         this.container = musicLibraryContainer;
         root.appendChild(this.container);
 
-        this.playlistView = new PlaylistView(this.musicLibrary, this, this.container)
+        this.playlistView = new PlaylistView(this.musicLibrary, this.container, null);
 
         await this.renderPlaylistPicker();
     }
@@ -70,6 +35,11 @@ export class MusicLibraryView {
 
         this.container.appendChild(playlistsContainer);
 
+        const playlistsHeader = document.createElement("h2");
+        playlistsHeader.innerHTML = "Plejliste";
+        playlistsHeader.className = "playlistsHeader";
+        playlistsContainer.appendChild(playlistsHeader);
+
         await this.musicLibrary.getPlaylists();
 
         this.musicLibrary.playlists.forEach(playlist => {
@@ -78,8 +48,9 @@ export class MusicLibraryView {
             playlistComponent.className = "playlistComponent";
             playlistComponent.id = playlist.id;
 
-            playlistComponent.addEventListener("click", () => {
-                this.playlistView.renderPlaylistSidebar(this.container, playlist);
+            playlistComponent.addEventListener("click", async () => {
+                this.playlistView.playlist = playlist;
+                await this.playlistView.renderPlaylistSidebar();
             });
 
             const playlistImage = document.createElement("div");
@@ -106,7 +77,7 @@ export class MusicLibraryView {
             playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(playlist, e.target));
 
 
-            playlistComponent.appendChild(playlistLabel);
+            playlistImage.appendChild(playlistLabel);
             playlistComponent.appendChild(playlistRenameBtn);
             playlistComponent.appendChild(playlistDeleteBtn);
             playlistsContainer.appendChild(playlistComponent);
@@ -121,12 +92,12 @@ export class MusicLibraryView {
         });
 
         const addPlaylist = document.createElement("div");
-        addPlaylist.className = "playlistImage";
+        addPlaylist.className = "addPlaylistImage";
         addPlaylist.innerHTML = "+";
         playlistComponent.appendChild(addPlaylist);
 
         const playlistLabel = document.createElement("label");
-        playlistLabel.className = "playlistLabel";
+        playlistLabel.className = "addPlaylistLabel";
         playlistLabel.innerText = "Dodaj novu plejlistu";
 
         playlistComponent.appendChild(playlistLabel);
@@ -157,19 +128,19 @@ export class MusicLibraryView {
 
         let modalInput = document.createElement("input");
         modalInput.className = "modalInput";
+        modalInput.required = true;
         modalForm.appendChild(modalInput);
 
-        modalInput.focus();
-
+        
         let btnAction = document.createElement("button");
         btnAction.className = "btnAction";
         btnAction.innerText = action;
         modalForm.appendChild(btnAction);
-
+        
         closeBtn.addEventListener("click", e => {
             this.closeModal(modal);
         });
-
+        
         btnAction.addEventListener("click", async (e) => {
             e.preventDefault();
             let actionSucceeded = false;
@@ -184,8 +155,9 @@ export class MusicLibraryView {
                 await this.renderPlaylistPicker(root);
             }
         });
-
+        
         modalContent.appendChild(modalForm);
+        modalInput.focus();
     }
 
     closeModal(modal) {
@@ -215,7 +187,8 @@ export class MusicLibraryView {
         if (await playlist.renamePlaylist(name)) {
             await this.renderPlaylistPicker(this.container);
             playlist.name = name;
-            await this.playlistView.renderPlaylistSidebar(this.container, playlist);
+            
+            await this.playlistView.renderPlaylistSidebar();
 
             return true;
         }
@@ -226,6 +199,9 @@ export class MusicLibraryView {
         if (await this.musicLibrary.deletePlaylist(playlist)) {
             const playlistComponent = button.parentElement;
             playlistComponent.remove();
+            if (playlist === this.playlistView.playlist) {
+                this.playlistView.removePlaylistSidebar();
+            }
         }
     }
 

@@ -10,7 +10,6 @@ export class Track {
     }
 
     async changeTrackRating(newRating) {
-        console.log(this, newRating);
         const res = await fetch(`https://localhost:5001/Track/ChangeRating/${this.id}/${newRating}`, {
             method: "PATCH"
         });

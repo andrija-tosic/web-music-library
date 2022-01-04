@@ -12,5 +12,6 @@ namespace Models
         public string Owner { get; set; }
 
         public List<Artist> Artists { get; set; }
+        public List<Playlist> Playlists { get; set; }
     }
 }

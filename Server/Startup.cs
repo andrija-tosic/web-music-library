@@ -36,6 +36,7 @@ namespace web_music_library
             {
                 options.AddPolicy("CORS", builder =>
                 {
+                    builder.AllowAnyOrigin();
                     builder.WithOrigins(new string[]
                     {
                         "http://localhost:5500",

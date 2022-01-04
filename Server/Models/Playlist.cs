@@ -19,5 +19,7 @@ namespace Models
 
         [JsonIgnore]
         public List<PlaylistTrack> PlaylistTracks { get; set; }
+        
+        public MusicLibrary MusicLibrary { get; set; }
     }
 }

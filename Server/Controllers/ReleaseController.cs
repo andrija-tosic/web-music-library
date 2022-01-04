@@ -24,26 +24,25 @@ namespace Controllers
         {
             try
             {
-                var artists = Context.Artists
-                .Where(a => a.Id == id)
-                .Include(a => a.Releases);
+                var query = Context.Releases
+                .Where(r => r.Artists.Select(a => a.Id).Contains(id));
 
-
-                var releases = await artists.Select(a =>
-                    a.Releases.Select(r =>
+                var releases = await query.Select(r =>
                     new
                     {
                         r.Id,
                         r.Name
-                    })
-                ).FirstAsync();
+                    }
+                ).ToListAsync();
 
-            return Ok(releases);
-        }
+                releases.Sort((r1, r2) => r1.Name.CompareTo(r2.Name));
+            
+                return Ok(releases);
+            }
             catch (System.Exception e)
             {
                 return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
-    }
-}
+            }
+        }
     }
 }
