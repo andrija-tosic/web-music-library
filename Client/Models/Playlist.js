@@ -1,12 +1,13 @@
 import {Track} from "../Models/Track.js";
 
 export class Playlist {
-    constructor(id, name, numberOfTracks, length, tracks) {
+    constructor(id, name, numberOfTracks, length, tracks, musicLibrary) {
         this.id = id;
         this.name = name;
         this.numberOfTracks = numberOfTracks;
         this.length = length;
         this.tracks = tracks;
+        this.musicLibrary = musicLibrary;
     }
 
     async loadPlaylistTracks() {

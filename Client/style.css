@@ -2,6 +2,16 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+button {
+    width: 100px;
+    margin-top: 1em;
+    border-radius: 5px;
+    background-color: lightgreen;
+    border: none;
+    padding: .2em;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
+}
+
 .musicLibraryContainer {
     display: flex;
     flex-direction: row;
@@ -36,12 +46,12 @@
     align-content: center;
     flex: 0 0 auto;
     justify-content: center;
-    border-radius: 0.5em;
     background-color:mediumseagreen;
     width: 10em;
     height: 10em;
     margin: .5em;
     overflow: hidden;
+    padding: 1em;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.25);
 }
 
@@ -79,6 +89,7 @@
 table {
     border-collapse: collapse;
     width: 100%;
+    font-size: 0.9em;
 }
 
 .playlistTitle {
@@ -92,8 +103,9 @@ tr {
 }
 
 th, td {
-    padding: 0.5em 0.5em 0.5em 0.5em;
+    padding: 0.1em;
     text-align: center;
+    white-space: nowrap;
 }
 
 tbody tr:nth-child(even) {
@@ -165,21 +177,11 @@ tbody tr:nth-child(odd) {
     flex-direction: column;
 }
 
-button {
-    width: 100px;
-    margin-top: 1em;
-    border-radius: 5px;
-    background-color: lightgreen;
-    border: none;
-    padding: .2em;
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
-}
-
 .removeTrackBtn {
-    font-size: xx-large;
+    font-size: x-large;
     margin-top: 0;
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     background-color: #ec646d;
 }
@@ -188,7 +190,7 @@ input, select {
     width: 15em;
 }
 
-@media screen and (max-width: 650px) {
+@media screen and (max-width: 800px) {
     .musicLibraryContainer {
         flex-direction: column;
         flex-wrap: wrap;
@@ -223,8 +225,8 @@ input, select {
     table td {
       border-bottom: 1px solid #ddd;
       display: block;
-      font-size: .8em;
       text-align: right;
+      padding: 1em;
     }
     
     table td::before {

@@ -10,34 +10,34 @@ export class PlaylistView {
         playlistSidebar.remove();
     }
 
-    async renderPlaylistSidebar() {
-        let playlistSidebar = this.container.querySelector(".playlistSidebar");
-
-        if (playlistSidebar != null) {
-            playlistSidebar.innerHTML = ""; // removes all children
-        }
-        else {
-            playlistSidebar = document.createElement("div");
-            playlistSidebar.className = "playlistSidebar";
-        }
-        this.container.appendChild(playlistSidebar);
-
-        const addTrackHeader = document.createElement("h3");
-        addTrackHeader.innerHTML = "Dodaj pesmu";
-        playlistSidebar.appendChild(addTrackHeader);
-
+    async renderAddTrackForm(playlistTitle, tbody, playlistSidebar) {
+        
         const addTrackForm = document.createElement("form");
         addTrackForm.className = "addTrackForm";
+        
+        const addTrackHeader = document.createElement("h3");
+        addTrackHeader.innerHTML = "Dodaj pesmu";
+        addTrackForm.appendChild(addTrackHeader);
 
         let artistSelect = document.createElement("select");
         let artistSelectLabel = document.createElement("label");
         artistSelectLabel.innerHTML = "Izvodjac:";
 
-        let artists = await this.musicLibrary.getArtists();
+        let artists;
+
+        if (this.musicLibrary.artists.length == 0) {
+          console.log("no artists in memory");
+            artists = await this.musicLibrary.getArtists();
+        }
+        else
+            artists = this.musicLibrary.artists;
 
         let manualChangeEvent = new Event('change');
 
-        if (artists != null) {
+        if (artists == null)
+            return;
+
+        if (artists.length != 0) {
             artistSelect.innerHTML = "";
             artists.forEach(artist => {
                 let option = document.createElement("option");
@@ -56,7 +56,18 @@ export class PlaylistView {
                 return;
 
             let selectedIndex = artistSelect.selectedIndex;
-            let releases = await this.musicLibrary.getReleasesFromArtist(artistSelect.options[selectedIndex].value);
+
+            let artist = this.musicLibrary.artists.find(a => a.id == artistSelect.options[selectedIndex].value);
+
+            let releases;
+
+            if (artist && artist.releases && artist.releases.length != 0) {
+                releases = artist.releases;
+            }
+            else {
+                console.log("no releases in memory");
+                releases = await this.musicLibrary.getReleasesFromArtist(artistSelect.options[selectedIndex].value);
+            }
 
             if (releases == null)
                 return;
@@ -86,7 +97,22 @@ export class PlaylistView {
             let artistId = artistSelect.options[artistSelectedIndex].value;
             let releaseId = releaseSelect.options[releaseSelectedIndex].value;
 
-            let tracks = await this.musicLibrary.getTracksFromRelease(artistId, releaseId);
+            let artist = this.musicLibrary.artists.find(a => a.id == artistId);
+
+            let release;
+            if (artist) {
+                release = artist.releases.find(r => r.id == releaseId);
+            }
+
+            let tracks;
+
+            if (release && release.tracks && release.tracks.length != 0) {
+                tracks = release.tracks;
+            }
+            else {
+                console.log("no tracks in memory");
+                tracks = await this.musicLibrary.getTracksFromRelease(artistId, releaseId);
+            }
 
             if (tracks == null)
                 return;
@@ -120,13 +146,40 @@ export class PlaylistView {
         playlistSidebar.appendChild(addTrackForm);
 
         artistSelect.dispatchEvent(manualChangeEvent);
+    }
 
-        let playlistTitle = document.createElement("h2");
+    async renderPlaylistSidebar() {
+        let playlistSidebar = this.container.querySelector(".playlistSidebar");
+
+        if (playlistSidebar == null) {
+            playlistSidebar = document.createElement("div");
+            playlistSidebar.className = "playlistSidebar";
+        }
+        
+        const addTrackForm = playlistSidebar.querySelector(".addTrackForm");
+
+        const playlistTitle = document.createElement("h2");
+        const tbody = document.createElement("tbody");
+
+        if (!addTrackForm) {
+            await this.renderAddTrackForm(playlistTitle, tbody, playlistSidebar);
+        }
+
+        let playlistDiv = playlistSidebar.querySelector(".playlistDiv");
+
+        if (playlistDiv)
+            playlistDiv.innerHTML = "";
+        else {
+            playlistDiv = document.createElement("div");
+            playlistDiv.className = "playlistDiv";
+        }
+
+        this.container.appendChild(playlistSidebar);
+
         playlistTitle.className = "playlistTitle";
 
         playlistTitle.textContent = `${this.playlist.name} (${this.playlist.numberOfTracks} pesama, ukupno ${this.formatTime(this.playlist.length)})`;
-        playlistSidebar.appendChild(playlistTitle);
-
+        
         let tracksTable = document.createElement("table");
         tracksTable.className = "tracksTable";
 
@@ -134,22 +187,27 @@ export class PlaylistView {
 
         const headerRow = document.createElement("tr");
         header.appendChild(headerRow);
-
+        
         let headers = ["Redni broj", "Naziv", "Izvodjac(i)", "Album", "Ocena", "Trajanje"];
         headers.forEach(col => {
             let th = document.createElement("th");
             th.innerHTML = col;
             headerRow.appendChild(th);
         });
-
+        
         tracksTable.appendChild(header);
-
-        const tbody = document.createElement("tbody");
+        
         tracksTable.appendChild(tbody);
-
+        
         const playlistTracks = await this.playlist.loadPlaylistTracks();
-        playlistTracks.forEach(async (track) => await this.appendTrackToPlaylistView(playlistTitle, tbody, track));
-        playlistSidebar.appendChild(tracksTable);
+        
+        for (const track of playlistTracks) {
+            await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
+        }
+        
+        playlistDiv.appendChild(playlistTitle);
+        playlistDiv.appendChild(tracksTable);
+        playlistSidebar.appendChild(playlistDiv);
     }
 
     async appendTrackToPlaylistView(playlistTitle, tbody, track) {
@@ -192,7 +250,6 @@ export class PlaylistView {
         removeTrackBtn.innerHTML = "&#x1f5d1"; // unicode trashcan symbol
         removeTrackBtn.className = "removeTrackBtn"
         td.appendChild(removeTrackBtn);
-        td.setAttribute("data-label", "Track number");
         tr.appendChild(td);
 
         tbody.appendChild(tr);
@@ -210,7 +267,9 @@ export class PlaylistView {
                     playlistTitle.innerHTML = `${playlist.name} (0 pesama, ukupno ${this.formatTime(0)})`;
                 }
 
-                this.playlist.tracks.forEach(async (track) => await this.appendTrackToPlaylistView(playlistTitle, tbody, track));
+                for (const track of this.playlist.tracks) {
+                    await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
+                }
             }
         });
     }

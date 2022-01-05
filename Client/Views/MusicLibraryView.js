@@ -8,14 +8,13 @@ export class MusicLibraryView {
     }
 
     async initRender(root) {
-        root.innerHTML = "";
-
         const header = document.createElement("h1");
         header.innerHTML = `Muzicka biblioteka ${this.musicLibrary.owner}`;
         root.appendChild(header)
 
         const musicLibraryContainer = document.createElement("div");
         musicLibraryContainer.className = "musicLibraryContainer";
+        musicLibraryContainer.id = this.musicLibrary.id;
         this.container = musicLibraryContainer;
         root.appendChild(this.container);
 
@@ -25,7 +24,7 @@ export class MusicLibraryView {
     }
 
     async renderPlaylistPicker() {
-        const prevContainer = document.querySelector(".playlistsContainer");
+        const prevContainer = this.container.querySelector(`.playlistsContainer`);
         if (prevContainer) {
             prevContainer.remove();
         }
@@ -44,7 +43,7 @@ export class MusicLibraryView {
 
         this.musicLibrary.playlists.forEach(playlist => {
 
-            const playlistComponent = document.createElement("div");
+            const playlistComponent = document.createElement("button");
             playlistComponent.className = "playlistComponent";
             playlistComponent.id = playlist.id;
 
@@ -83,7 +82,7 @@ export class MusicLibraryView {
             playlistsContainer.appendChild(playlistComponent);
         });
 
-        const playlistComponent = document.createElement("div");
+        const playlistComponent = document.createElement("button");
         playlistComponent.className = "playlistComponent";
 
         playlistComponent.addEventListener("click", e => {

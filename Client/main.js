@@ -1,7 +1,18 @@
 import { MusicLibrary } from "./Models/MusicLibrary.js"
-import { MusicLibraryView  } from "./Views/MusicLibraryView.js";
+import { MusicLibraryView } from "./Views/MusicLibraryView.js";
 
-const musicLibrary1 = new MusicLibrary('Andrija');
-const musicLibraryView1 = new MusicLibraryView(musicLibrary1);
+async function getMusicLibraries() {
+    const res = await fetch("https://localhost:5001/MusicLibrary/GetMusicLibraries");
 
-musicLibraryView1.initRender(document.body);
+    if (res.ok) {
+        const data = await res.json();
+
+        for (const musicLibrary of data) {
+            const library = new MusicLibrary(musicLibrary.id, musicLibrary.owner);
+            const musicLibraryView = new MusicLibraryView(library);
+            await musicLibraryView.initRender(document.body);
+        }
+    }
+}
+
+await getMusicLibraries();

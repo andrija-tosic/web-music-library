@@ -51,13 +51,14 @@ namespace Controllers
             }
         }
 
-        [Route("GetArtists")]
+        [Route("GetArtists/{id}")]
         [HttpGet]
-        public async Task<ActionResult> GetArtists()
+        public async Task<ActionResult> GetArtists(int id)
         {
             try
             {
-                var artists = await Context.Artists.Select(a => 
+                var artists = await Context.Artists
+                .Select(a => 
                 new
                 {
                     a.Id,

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Models
 {
@@ -10,8 +11,8 @@ namespace Models
 
         [Required]
         public string Owner { get; set; }
-
-        public List<Artist> Artists { get; set; }
+        
+        [JsonIgnore]
         public List<Playlist> Playlists { get; set; }
     }
 }

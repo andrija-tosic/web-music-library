@@ -5,14 +5,15 @@ import { Track } from "../Models/Track.js"
 
 
 export class MusicLibrary {
-    constructor(owner) {
+    constructor(id, owner) {
+        this.id = id;
         this.owner = owner;
         this.playlists = [];
         this.artists = [];
     }
 
     async getPlaylists() {
-        const res = await fetch("https://localhost:5001/Playlist/GetPlaylists");
+        const res = await fetch(`https://localhost:5001/Playlist/GetPlaylists/${this.id}`);
 
         if (!res.ok)
             return null;
@@ -22,7 +23,7 @@ export class MusicLibrary {
         this.playlists = [];
 
         data.forEach(playlist => {
-            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length);
+            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length, this);
             this.playlists.push(p);
         });
 
@@ -30,18 +31,17 @@ export class MusicLibrary {
     }
 
     async addPlaylist(name) {
-        let playlist = new Playlist(0, name, 0, 0, null);
-        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/`, {
+        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${this.id}/${name}`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(playlist)
+            // circular JSON
         });
 
         if (res.ok) {
             const data = res.json();
-            playlist = new Playlist(data.id, data.name, data.numberOfTracks, data.length, null);
+            const playlist = new Playlist(data.id, data.name, data.numberOfTracks, data.length, null, this);
             this.playlists.push(playlist);
             return true;
         }
@@ -51,7 +51,7 @@ export class MusicLibrary {
     }
 
     async deletePlaylist(playlist) {
-        const res = await fetch(`https://localhost:5001/Playlist/DeletePlaylist/${playlist.id}`, {
+        const res = await fetch(`https://localhost:5001/Playlist/DeletePlaylist/${this.id}/${playlist.id}`, {
             method: "DELETE"
         });
 
@@ -64,21 +64,8 @@ export class MusicLibrary {
         }
     }
 
-    async matchArtists(artistName) {
-        const res = await fetch(`https://localhost:5001/Artist/MatchArtists/${artistName}`, {
-            method: "GET"
-        });
-
-        if (res.ok) {
-            let artists = await res.json();
-            return artists;
-        }
-        else
-            return null;
-    }
-
     async getArtists() {
-        const res = await fetch(`https://localhost:5001/Artist/GetArtists/`, {
+        const res = await fetch(`https://localhost:5001/Artist/GetArtists/${this.id}`, {
             method: "GET"
         });
 
@@ -86,7 +73,7 @@ export class MusicLibrary {
             let data = await res.json();
             this.artists = [];
             data.forEach(artist => {
-                this.artists.push(new Artist(artist.id, null, null, artist.artistName));
+                this.artists.push(new Artist(artist.id, null, null, artist.artistName, null));
             })
             return this.artists;
         }
