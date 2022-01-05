@@ -4,7 +4,6 @@ export class MusicLibraryView {
     constructor(musicLibrary) {
         this.musicLibrary = musicLibrary;
         this.container = null;
-        this.playlistView = null;
     }
 
     async initRender(root) {
@@ -156,6 +155,12 @@ export class MusicLibraryView {
         });
         
         modalContent.appendChild(modalForm);
+
+        modalInput.addEventListener("keyup", e => {
+            if (e.key === "Escape")
+                this.closeModal(modal);
+        })
+
         modalInput.focus();
     }
 

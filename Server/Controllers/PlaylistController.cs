@@ -149,10 +149,13 @@ namespace Controllers
         {
             try
             {
-                var playlist = Context.Playlists.Find(playlistId);
-                var playlistTrack = Context.PlaylistTracks.Where(pt => pt.TrackNumber == trackNumber).FirstOrDefault();
+                Playlist playlist = Context.Playlists.Find(playlistId);
+                PlaylistTrack playlistTrack = Context.PlaylistTracks
+                .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
+                .FirstOrDefault();
 
-                var track = Context.PlaylistTracks.Where(pt => pt.TrackNumber == trackNumber)
+                Track track = Context.PlaylistTracks
+                .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
                 .Include(pt => pt.Track)
                 .Select(pt => pt.Track)
                 .FirstOrDefault();
@@ -179,7 +182,7 @@ namespace Controllers
 
                 await Context.SaveChangesAsync();
 
-                return Ok($"Track removed from playlist {playlistId}.");
+                return Ok($"Track number {trackNumber} removed from playlist {playlistId}.");
             }
             catch (System.Exception e)
             {

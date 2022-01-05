@@ -48,7 +48,15 @@ export class Playlist {
         });
 
         if (res.ok) {
-            this.tracks.pop(track);
+            this.tracks = this.tracks.filter(t => t.number != track.number);
+
+            this.length -= track.duration;
+            this.numberOfTracks--;
+            this.tracks.map(t => {
+                if (t.number > track.number)
+                    t.number--;
+            });
+
             return true;
         }
         else {
