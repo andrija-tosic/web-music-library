@@ -17,7 +17,7 @@ export class MusicLibraryView {
         this.container = musicLibraryContainer;
         root.appendChild(this.container);
 
-        this.playlistView = new PlaylistView(this.musicLibrary, this.container, null);
+        this.playlistView = new PlaylistView(this.musicLibrary, this.container);
 
         await this.renderPlaylistPicker();
     }
@@ -38,7 +38,9 @@ export class MusicLibraryView {
         playlistsHeader.className = "playlistsHeader";
         playlistsContainer.appendChild(playlistsHeader);
 
-        await this.musicLibrary.getPlaylists();
+        // check in memory
+        if (!this.musicLibrary.playlists || this.musicLibrary.playlists.length == 0)
+            await this.musicLibrary.getPlaylists();
 
         this.musicLibrary.playlists.forEach(playlist => {
 

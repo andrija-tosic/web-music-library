@@ -198,7 +198,14 @@ export class PlaylistView {
 
         tracksTable.appendChild(tbody);
 
-        const playlistTracks = await this.playlist.loadPlaylistTracks();
+        let playlistTracks;
+
+        if (!this.playlist || !this.playlist.tracks || this.playlist.tracks.length == 0) {
+            playlistTracks = await this.playlist.loadPlaylistTracks();
+        }
+        else {
+            playlistTracks = this.playlist.tracks;
+        }
 
         playlistDiv.appendChild(playlistTitle);
         playlistDiv.appendChild(tracksTable);

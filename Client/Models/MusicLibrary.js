@@ -23,7 +23,7 @@ export class MusicLibrary {
         this.playlists = [];
 
         data.forEach(playlist => {
-            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length, this);
+            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length, null, this);
             this.playlists.push(p);
         });
 
@@ -40,7 +40,7 @@ export class MusicLibrary {
         });
 
         if (res.ok) {
-            const data = res.json();
+            const data = await res.json();
             const playlist = new Playlist(data.id, data.name, data.numberOfTracks, data.length, null, this);
             this.playlists.push(playlist);
             return true;
