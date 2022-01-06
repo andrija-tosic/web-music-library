@@ -124,20 +124,32 @@ export class MusicLibrary {
             return null;
     }
 
-    async addTrackToPlaylist(trackId, playlist) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddTrackToPlaylist/${trackId}/${playlist.id}`, {
-            method: "PUT"
+    async addTracksToPlaylist(trackIds, playlist) {
+        console.log(trackIds.map(id => parseInt(id)));
+        const res = await fetch(`https://localhost:5001/Playlist/AddTracksToPlaylist/${playlist.id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(trackIds.map(id => parseInt(id)))
         });
 
         if (res.ok) {
-            let data = await res.json();
-            const track = new Track(data.id, data.trackNumber, data.name, data.artists, data.release, data.rating, data.duration);
-            
-            playlist.tracks.push(track);
-            playlist.numberOfTracks++;
-            playlist.length += track.duration;
+            const tracksData = await res.json();
 
-            return track;
+            const addedTracks = [];
+
+            tracksData.forEach(data => {
+                const track = new Track(data.id, data.trackNumber, data.name, data.artists, data.release, data.rating, data.duration);
+                
+                addedTracks.push(track);
+                
+                playlist.tracks.push(track);
+                playlist.numberOfTracks++;
+                playlist.length += track.duration;
+            })
+
+            return addedTracks;
         }
         else {
             return null;

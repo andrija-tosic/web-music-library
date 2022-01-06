@@ -43,8 +43,8 @@ export class Playlist {
     }
 
     async removeTrackFromPlaylist(track) {
-        const res = await fetch(`https://localhost:5001/Playlist/RemoveTrackFromPlaylist/${track.number}/${this.id}`, {
-            method: "PATCH"
+        const res = await fetch(`https://localhost:5001/PlaylistTrack/RemoveTrackFromPlaylist/${track.number}/${this.id}`, {
+            method: "DELETE"
         });
 
         if (res.ok) {

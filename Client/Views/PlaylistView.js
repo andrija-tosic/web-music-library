@@ -41,7 +41,7 @@ export class PlaylistView {
         let artists;
 
         if (this.musicLibrary.artists.length == 0) {
-            console.log("no artists in memory");
+            console.log("No artists in memory, must fetch");
             artists = await this.musicLibrary.getArtists();
         }
         else
@@ -80,7 +80,7 @@ export class PlaylistView {
                 releases = artist.releases;
             }
             else {
-                console.log("no releases in memory");
+                console.log(`No releases from ${artist.artistName} in memory, must fetch`);
                 releases = await this.musicLibrary.getReleasesFromArtist(artistSelect.options[selectedIndex].value);
             }
 
@@ -102,6 +102,7 @@ export class PlaylistView {
         });
 
         let trackSelect = document.createElement("select");
+        trackSelect.multiple = true;
         let trackSelectLabel = document.createElement("label");
         trackSelectLabel.innerHTML = "Pesma:";
 
@@ -126,7 +127,7 @@ export class PlaylistView {
                 tracks = release.tracks;
             }
             else {
-                console.log("no tracks in memory");
+                console.log(`No tracks from ${release.name} in memory, must fetch`);
                 tracks = await this.musicLibrary.getTracksFromRelease(artistId, releaseId);
             }
 
@@ -143,13 +144,19 @@ export class PlaylistView {
         });
 
         let addTrackBtn = document.createElement("button");
-        addTrackBtn.innerHTML = "Dodaj pesmu";
+        addTrackBtn.innerHTML = "Dodaj pesme";
 
         addTrackBtn.addEventListener("click", async (e) => {
             e.preventDefault();
-            const selectedIndex = trackSelect.options.selectedIndex;
-            const trackToAppend = await this.onBtnAddTrackClick(trackSelect.options[selectedIndex].value);
-            await this.appendTrackToPlaylistView(playlistTitle, tbody, trackToAppend);
+            const trackIds = Array.from(trackSelect.selectedOptions)
+            .map(option => option.value)
+
+            const tracksToAppend = await this.onBtnAddTrackClick(trackIds);
+            
+            tracksToAppend.forEach(async(track) => {
+                await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
+            })
+
         });
 
         addTrackForm.appendChild(artistSelectLabel);
@@ -220,6 +227,7 @@ export class PlaylistView {
         const tr = document.createElement("tr");
 
         let td = document.createElement("td");
+        console.log(track.number);
         td.innerHTML = track.number;
         td.setAttribute("data-label", "Redni broj");
         tr.appendChild(td);
@@ -312,15 +320,15 @@ export class PlaylistView {
         }
     }
 
-    async onBtnAddTrackClick(trackId) {
-        if (trackId == undefined) {
+    async onBtnAddTrackClick(trackIds) {
+        if (trackIds == undefined) {
             alert("Odaberite pesmu.");
             return;
         }
 
-        const addedTrack = await this.musicLibrary.addTrackToPlaylist(trackId, this.playlist);
-        if (addedTrack != null) {
-            return addedTrack;
+        const addedTracks = await this.musicLibrary.addTracksToPlaylist(trackIds, this.playlist);
+        if (addedTracks != null) {
+            return addedTracks;
         }
         else
             return null;

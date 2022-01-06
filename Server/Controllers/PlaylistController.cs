@@ -93,96 +93,52 @@ namespace Controllers
             await Context.SaveChangesAsync();
         }
 
-        [Route("AddTrackToPlaylist/{trackId}/{playlistId}")]
-        [HttpPut]
-        public async Task<ActionResult> AddTrackToPlaylist(int trackId, int playlistId)
+        [Route("AddTracksToPlaylist/{playlistId}")]
+        [HttpPost]
+        public async Task<ActionResult> AddTracksToPlaylist([FromBody] int[] trackIds, int playlistId)
         {
             try
             {
-                var track = await Context.Tracks.FindAsync(trackId);
+                var tracks = Context.Tracks.Where(t => trackIds.Contains(t.Id));
                 var playlist = await Context.Playlists.FindAsync(playlistId);
 
-                if (track == null || playlist == null)
+                if (tracks == null || playlist == null)
                 {
                     return NotFound("Track or playlist invalid and not found.");
                 }
 
-                Context.PlaylistTracks.Add(new PlaylistTrack
+                foreach (Track track in tracks)
                 {
-                    Track = track,
-                    Playlist = playlist,
-                    TrackNumber = (++playlist.NumberOfTracks) ?? 1
-                });
+                    Context.PlaylistTracks.Add(new PlaylistTrack
+                    {
+                        Track = track,
+                        Playlist = playlist,
+                        TrackNumber = (++playlist.NumberOfTracks) ?? 1
+                    });
+                }
 
-                playlist.Length += track.Duration ?? 0;
+                playlist.Length += tracks.Sum(t => t.Duration) ?? 0;
 
                 await Context.SaveChangesAsync();
 
                 var trackReleaseAndArtists = Context.Tracks
                 .Include(t => t.Release)
                 .ThenInclude(r => r.Artists)
-                .Where(t => t.Id == trackId);
+                .Where(t => trackIds.Contains(t.Id));
 
 
-                var retVal = new
+                var retVal = trackReleaseAndArtists.Select(track => new
                 {
                     track.Id,
-                    TrackNumber = playlist.NumberOfTracks,
+                    TrackNumber = track.PlaylistTracks.Where(pt => pt.Track.Id == track.Id).First().TrackNumber,
                     track.Name,
-                    Artists = trackReleaseAndArtists.Select(a => a.Release.Artists.Select(a => a.ArtistName)).ToList(),
-                    Release = trackReleaseAndArtists.Select(a => a.Release.Name).FirstOrDefault(),
+                    Artists = track.Release.Artists.Select(a => a.ArtistName).ToList(),
+                    Release = track.Release.Name,
                     track.Rating,
                     track.Duration
-                };
+                });
 
                 return Ok(retVal);
-            }
-            catch (System.Exception e)
-            {
-                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
-            }
-        }
-
-        [Route("RemoveTrackFromPlaylist/{trackNumber}/{playlistId}")]
-        [HttpPatch]
-        public async Task<ActionResult> RemoveTrackFromPlaylist(int trackNumber, int playlistId)
-        {
-            try
-            {
-                Playlist playlist = Context.Playlists.Find(playlistId);
-                PlaylistTrack playlistTrack = Context.PlaylistTracks
-                .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
-                .FirstOrDefault();
-
-                Track track = Context.PlaylistTracks
-                .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
-                .Include(pt => pt.Track)
-                .Select(pt => pt.Track)
-                .FirstOrDefault();
-
-                if (playlistTrack == null || track == null || playlist == null)
-                {
-                    return NotFound($"Such entry with track and playlist {playlistId} not found.");
-                }
-
-                Context.PlaylistTracks.Remove(playlistTrack);
-
-                playlist.Length -= track.Duration;
-                playlist.NumberOfTracks--;
-
-                var playlistEntries = Context.PlaylistTracks.Where(pt => pt.Playlist.Id == playlistId);
-
-                foreach (PlaylistTrack entry in playlistEntries)
-                {
-                    if (entry.TrackNumber > trackNumber)
-                    {
-                        entry.TrackNumber--;
-                    }
-                }
-
-                await Context.SaveChangesAsync();
-
-                return Ok($"Track number {trackNumber} removed from playlist {playlistId}.");
             }
             catch (System.Exception e)
             {
