@@ -99,13 +99,22 @@ namespace Controllers
         {
             try
             {
-                var tracks = Context.Tracks.Where(t => trackIds.Contains(t.Id));
-                var playlist = await Context.Playlists.FindAsync(playlistId);
+                var tracks = await Context.Tracks.Where(t => trackIds.Contains(t.Id)).ToListAsync();
+                Playlist playlist = await Context.Playlists.FindAsync(playlistId);
 
                 if (tracks == null || playlist == null)
                 {
                     return NotFound("Track or playlist invalid and not found.");
                 }
+
+                int prevNumberOfTracks = playlist.NumberOfTracks ?? 0;
+
+                int trackNumber;
+
+                if (playlist.NumberOfTracks != null)
+                    trackNumber = (int)playlist.NumberOfTracks + 1;
+                else
+                    trackNumber = 0;
 
                 foreach (Track track in tracks)
                 {
@@ -113,24 +122,27 @@ namespace Controllers
                     {
                         Track = track,
                         Playlist = playlist,
-                        TrackNumber = (++playlist.NumberOfTracks) ?? 1
+                        TrackNumber = trackNumber
                     });
+
+                    trackNumber++;
                 }
 
                 playlist.Length += tracks.Sum(t => t.Duration) ?? 0;
+                playlist.NumberOfTracks += tracks.ToList().Count;
 
                 await Context.SaveChangesAsync();
 
-                var trackReleaseAndArtists = Context.Tracks
+                var trackReleaseAndArtists = await Context.Tracks
                 .Include(t => t.Release)
                 .ThenInclude(r => r.Artists)
-                .Where(t => trackIds.Contains(t.Id));
+                .Where(t => trackIds.Contains(t.Id))
+                .ToListAsync();
 
-
-                var retVal = trackReleaseAndArtists.Select(track => new
+                var retVal = trackReleaseAndArtists.Select((track, index) => new
                 {
                     track.Id,
-                    TrackNumber = track.PlaylistTracks.Where(pt => pt.Track.Id == track.Id).First().TrackNumber,
+                    TrackNumber = (index + prevNumberOfTracks + 1),
                     track.Name,
                     Artists = track.Release.Artists.Select(a => a.ArtistName).ToList(),
                     Release = track.Release.Name,

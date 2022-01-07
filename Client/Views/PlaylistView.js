@@ -41,7 +41,7 @@ export class PlaylistView {
         let artists;
 
         if (this.musicLibrary.artists.length == 0) {
-            console.log("No artists in memory, must fetch");
+            console.log("Nema izvodjaca u memoriji, mora fetch");
             artists = await this.musicLibrary.getArtists();
         }
         else
@@ -80,7 +80,7 @@ export class PlaylistView {
                 releases = artist.releases;
             }
             else {
-                console.log(`No releases from ${artist.artistName} in memory, must fetch`);
+                console.log(`Nema albuma od ${artist.artistName} u memoriji, mora fetch`);
                 releases = await this.musicLibrary.getReleasesFromArtist(artistSelect.options[selectedIndex].value);
             }
 
@@ -127,7 +127,7 @@ export class PlaylistView {
                 tracks = release.tracks;
             }
             else {
-                console.log(`No tracks from ${release.name} in memory, must fetch`);
+                console.log(`Nema pesama iz ${release.name} u memoriji, mora fetch`);
                 tracks = await this.musicLibrary.getTracksFromRelease(artistId, releaseId);
             }
 
@@ -139,17 +139,21 @@ export class PlaylistView {
                 let option = document.createElement("option");
                 option.innerHTML = `${track.number} - ${track.name}`;
                 option.value = track.id;
+                option.selected = true;
                 trackSelect.appendChild(option);
             });
         });
 
         let addTrackBtn = document.createElement("button");
         addTrackBtn.innerHTML = "Dodaj pesme";
+        addTrackBtn.className = "addTrackBtn";
 
         addTrackBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             const trackIds = Array.from(trackSelect.selectedOptions)
             .map(option => option.value)
+
+            console.log(trackIds);
 
             const tracksToAppend = await this.onBtnAddTrackClick(trackIds);
             
@@ -227,7 +231,6 @@ export class PlaylistView {
         const tr = document.createElement("tr");
 
         let td = document.createElement("td");
-        console.log(track.number);
         td.innerHTML = track.number;
         td.setAttribute("data-label", "Redni broj");
         tr.appendChild(td);
@@ -289,7 +292,7 @@ export class PlaylistView {
     async appendRatingCircles(track, root) {
         for (let i = 0; i < 5; i++) {
 
-            let ratingCircle = document.createElement("div");
+            let ratingCircle = document.createElement("button");
             ratingCircle.id = `${i + 1}`;
             ratingCircle.className = "ratingCircle";
 

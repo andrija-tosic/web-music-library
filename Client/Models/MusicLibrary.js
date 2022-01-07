@@ -125,13 +125,12 @@ export class MusicLibrary {
     }
 
     async addTracksToPlaylist(trackIds, playlist) {
-        console.log(trackIds.map(id => parseInt(id)));
         const res = await fetch(`https://localhost:5001/Playlist/AddTracksToPlaylist/${playlist.id}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(trackIds.map(id => parseInt(id)))
+            body: JSON.stringify(trackIds)
         });
 
         if (res.ok) {
