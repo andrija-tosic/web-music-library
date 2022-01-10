@@ -42,7 +42,7 @@ export class MusicLibraryView {
         if (!this.musicLibrary.playlists || this.musicLibrary.playlists.length == 0)
             await this.musicLibrary.getPlaylists();
 
-        this.musicLibrary.playlists.forEach(playlist => {
+        for (const playlist of this.musicLibrary.playlists) {
 
             const playlistComponent = document.createElement("button");
             playlistComponent.className = "playlistComponent";
@@ -65,9 +65,15 @@ export class MusicLibraryView {
             playlistRenameBtn.className = "playlistRenameBtn";
             playlistRenameBtn.innerText = "Preimenuj";
             playlistRenameBtn.id = playlist.id;
-            playlistRenameBtn.addEventListener("click", e => {
+            playlistRenameBtn.addEventListener("click", async(e) => {
                 e.stopPropagation();
-                this.renderInputModal(playlist, this.container, "Novi naziv plejliste: ", "Preimenuj");
+                const newName = prompt("Novi naziv plejliste");
+                e.preventDefault();
+                let actionSucceeded = false;
+                actionSucceeded = await this.onBtnRenamePlaylistClick(playlist, newName);
+                if (actionSucceeded) {
+                    await this.renderPlaylistPicker();
+                }
             });
 
             const playlistDeleteBtn = document.createElement("button");
@@ -81,14 +87,22 @@ export class MusicLibraryView {
             playlistComponent.appendChild(playlistRenameBtn);
             playlistComponent.appendChild(playlistDeleteBtn);
             playlistsContainer.appendChild(playlistComponent);
-        });
+        }
 
         const playlistComponent = document.createElement("button");
         playlistComponent.className = "playlistComponent";
 
-        playlistComponent.addEventListener("click", e => {
+        playlistComponent.addEventListener("click", async(e) => {
             e.stopPropagation();
-            this.renderInputModal(null, this.container, "Naziv nove plejliste: ", "Dodaj");
+
+            const newPlaylistName = prompt("Naziv nove plejliste:");
+
+            let actionSucceeded = false;
+                actionSucceeded = await this.onBtnAddPlaylistClick(newPlaylistName);
+
+            if (actionSucceeded) {
+                await this.renderPlaylistPicker();
+            }
         });
 
         const addPlaylist = document.createElement("div");
@@ -102,68 +116,6 @@ export class MusicLibraryView {
 
         playlistComponent.appendChild(playlistLabel);
         playlistsContainer.appendChild(playlistComponent);
-    }
-
-    async renderInputModal(playlist, root, text, action) {
-        let modal = document.createElement("div");
-        modal.className = "addPlaylistModal";
-        document.body.appendChild(modal);
-
-        let modalContent = document.createElement("div");
-        modalContent.className = "modal-content";
-        modal.appendChild(modalContent);
-
-        let closeBtn = document.createElement("span");
-        closeBtn.className = "close";
-        closeBtn.innerHTML = "&times;"
-        modalContent.appendChild(closeBtn);
-
-        let modalForm = document.createElement("form");
-        modalForm.className = "modalForm";
-
-        let modalText = document.createElement("label");
-        modalText.className = "modalText";
-        modalText.innerHTML = text;
-        modalForm.appendChild(modalText);
-
-        let modalInput = document.createElement("input");
-        modalInput.className = "modalInput";
-        modalInput.required = true;
-        modalForm.appendChild(modalInput);
-
-        
-        let btnAction = document.createElement("button");
-        btnAction.className = "btnAction";
-        btnAction.innerText = action;
-        modalForm.appendChild(btnAction);
-        
-        closeBtn.addEventListener("click", e => {
-            this.closeModal(modal);
-        });
-        
-        btnAction.addEventListener("click", async (e) => {
-            e.preventDefault();
-            let actionSucceeded = false;
-            if (action === "Dodaj") {
-                actionSucceeded = await this.onBtnAddPlaylistClick(modalInput.value);
-            }
-            else if (action === "Preimenuj") {
-                actionSucceeded = await this.onBtnRenamePlaylistClick(playlist, modalInput.value);
-            }
-            if (actionSucceeded) {
-                this.closeModal(modal);
-                await this.renderPlaylistPicker(root);
-            }
-        });
-        
-        modalContent.appendChild(modalForm);
-
-        modalInput.addEventListener("keyup", e => {
-            if (e.key === "Escape")
-                this.closeModal(modal);
-        })
-
-        modalInput.focus();
     }
 
     closeModal(modal) {
@@ -193,7 +145,7 @@ export class MusicLibraryView {
         if (await playlist.renamePlaylist(name)) {
             await this.renderPlaylistPicker(this.container);
             playlist.name = name;
-            
+
             await this.playlistView.renderPlaylistSidebar();
 
             return true;

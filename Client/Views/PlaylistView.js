@@ -7,7 +7,8 @@ export class PlaylistView {
 
     removePlaylistSidebar() {
         let playlistSidebar = this.container.querySelector(".playlistSidebar");
-        playlistSidebar.remove();
+        if (playlistSidebar)
+            playlistSidebar.remove();
     }
 
     async renderPlaylistSidebar() {
@@ -208,7 +209,20 @@ export class PlaylistView {
             const trackIds = Array.from(trackSelect.selectedOptions)
             .map(option => option.value)
 
-            console.log(trackIds);
+            const trackIdsInt = trackIds.map(id => parseInt(id));
+
+            const duplicateTracks = 
+            Array.from(new Set(
+                this.playlist.tracks
+                .filter(t => trackIdsInt.includes(t.id))
+                .map(t => t.name)
+            ));
+
+            if (duplicateTracks.length != 0) {
+                    if (!confirm(`Dodati duplikate (${duplicateTracks.join(', ')})?`)) {
+                        return;
+                };
+            }
 
             const tracksToAppend = await this.onBtnAddTrackClick(trackIds);
             
