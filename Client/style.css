@@ -20,6 +20,7 @@ button {
     border-radius: 5px;
     background-color: var(--light);
     border: none;
+    cursor: pointer;
     padding: .2em;
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
 }
@@ -40,6 +41,10 @@ button {
     flex-direction: row;
     flex-wrap: wrap;
     align-content: flex-start;
+}
+
+.playlistDeleteBtn {
+    background-color: #ec646d;
 }
 
 .playlistsHeader {

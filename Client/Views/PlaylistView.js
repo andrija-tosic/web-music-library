@@ -18,10 +18,65 @@ export class PlaylistView {
             playlistSidebar.className = "playlistSidebar";
         }
 
-        let addTrackForm = playlistSidebar.querySelector(".addTrackForm");
-
         const playlistTitle = document.createElement("h2");
         const tbody = document.createElement("tbody");
+
+        this.renderAddTrackForm(playlistSidebar, playlistTitle, tbody);
+
+        let playlistDiv = playlistSidebar.querySelector(".playlistDiv");
+
+        if (playlistDiv)
+            playlistDiv.innerHTML = "";
+        else {
+            playlistDiv = document.createElement("div");
+            playlistDiv.className = "playlistDiv";
+        }
+
+        this.container.appendChild(playlistSidebar);
+
+        playlistTitle.className = "playlistTitle";
+
+        playlistTitle.innerHTML = `${this.playlist.name} (${this.playlist.numberOfTracks} pesama, ukupno ${this.formatTime(this.playlist.length)})`;
+
+        let tracksTable = document.createElement("table");
+        tracksTable.className = "tracksTable";
+
+        const header = document.createElement("thead");
+
+        const headerRow = document.createElement("tr");
+        header.appendChild(headerRow);
+
+        let headers = ["Redni broj", "Naziv", "Izvodjac(i)", "Album", "Ocena", "Trajanje"];
+        headers.forEach(col => {
+            let th = document.createElement("th");
+            th.innerHTML = col;
+            headerRow.appendChild(th);
+        });
+
+        tracksTable.appendChild(header);
+
+        tracksTable.appendChild(tbody);
+
+        let playlistTracks;
+
+        if (!this.playlist || !this.playlist.tracks || this.playlist.tracks.length == 0) {
+            playlistTracks = await this.playlist.loadPlaylistTracks();
+        }
+        else {
+            playlistTracks = this.playlist.tracks;
+        }
+
+        playlistDiv.appendChild(playlistTitle);
+        playlistDiv.appendChild(tracksTable);
+        playlistSidebar.appendChild(playlistDiv);
+
+        for (const track of playlistTracks) {
+            await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
+        }
+    }
+
+    async renderAddTrackForm(playlistSidebar, playlistTitle, tbody) {
+        let addTrackForm = playlistSidebar.querySelector(".addTrackForm");
 
         if (addTrackForm) {
             addTrackForm.remove();
@@ -159,8 +214,7 @@ export class PlaylistView {
             
             tracksToAppend.forEach(async(track) => {
                 await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
-            })
-
+            });
         });
 
         addTrackForm.appendChild(artistSelectLabel);
@@ -174,57 +228,6 @@ export class PlaylistView {
 
         manualChangeEvent = new Event('change');
         artistSelect.dispatchEvent(manualChangeEvent);
-
-        let playlistDiv = playlistSidebar.querySelector(".playlistDiv");
-
-        if (playlistDiv)
-            playlistDiv.innerHTML = "";
-        else {
-            playlistDiv = document.createElement("div");
-            playlistDiv.className = "playlistDiv";
-        }
-
-        this.container.appendChild(playlistSidebar);
-
-        playlistTitle.className = "playlistTitle";
-
-        playlistTitle.textContent = `${this.playlist.name} (${this.playlist.numberOfTracks} pesama, ukupno ${this.formatTime(this.playlist.length)})`;
-
-        let tracksTable = document.createElement("table");
-        tracksTable.className = "tracksTable";
-
-        const header = document.createElement("thead");
-
-        const headerRow = document.createElement("tr");
-        header.appendChild(headerRow);
-
-        let headers = ["Redni broj", "Naziv", "Izvodjac(i)", "Album", "Ocena", "Trajanje"];
-        headers.forEach(col => {
-            let th = document.createElement("th");
-            th.innerHTML = col;
-            headerRow.appendChild(th);
-        });
-
-        tracksTable.appendChild(header);
-
-        tracksTable.appendChild(tbody);
-
-        let playlistTracks;
-
-        if (!this.playlist || !this.playlist.tracks || this.playlist.tracks.length == 0) {
-            playlistTracks = await this.playlist.loadPlaylistTracks();
-        }
-        else {
-            playlistTracks = this.playlist.tracks;
-        }
-
-        playlistDiv.appendChild(playlistTitle);
-        playlistDiv.appendChild(tracksTable);
-        playlistSidebar.appendChild(playlistDiv);
-
-        for (const track of playlistTracks) {
-            await this.appendTrackToPlaylistView(playlistTitle, tbody, track);
-        }
     }
 
     async appendTrackToPlaylistView(playlistTitle, tbody, track) {
