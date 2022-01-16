@@ -7,8 +7,12 @@
     --bg: #eeeeee;
     --main: #ebe8e0;
     --light: #D3DEDC;
+    --lighter: #aed4cd;
 }
 
+select {
+    border-radius: 5px; 
+}
 
 select, select option {
     background-color: var(--main);
@@ -41,6 +45,8 @@ button {
     flex-direction: row;
     flex-wrap: wrap;
     align-content: flex-start;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.25);
+    z-index: 0;
 }
 
 .playlistDeleteBtn {
@@ -49,6 +55,7 @@ button {
 
 .playlistsHeader {
     flex-basis: 100%;
+    margin-left: 0.5em;
 }
 
 .playlistSidebar {
@@ -56,6 +63,15 @@ button {
     height: 100%;
     flex: 50%;
     background-color: var(--bg);
+    box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.playlistDiv {
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.05);
+    padding-left: 1em;
+    margin-top: 1em;
+    padding-top: 0.1em;
 }
 
 .playlistComponent {
@@ -73,10 +89,6 @@ button {
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.25);
 }
 
-.addPlaylistImage {
-    font-size: 3rem;
-}
-
 .playlistImage, .addPlaylistImage {
     display: flex;
     align-self: center;
@@ -84,10 +96,19 @@ button {
     justify-content: center;
     align-items: center;
     vertical-align: middle;
+    min-width: 50%;
+    max-width: 90%;
+    height: 50%;
+    border-radius: 8px;
+    background-color: var(--light);
+    font-weight:bold;
+}
+
+.addPlaylistImage {
     width: 50%;
     height: 50%;
-    border-radius: 10px;
-    background-color: var(--light);
+    font-size: 3rem;
+    font-weight: normal;
 }
 
 .artistLabel, .playlistLabel {
@@ -99,16 +120,23 @@ button {
     margin-top: 1em;
 }
 
-.artistComponent:hover, .playlistComponent:hover, .addTrackBtn:hover, .removeTrackBtn:hover {
+.playlistComponent:hover, .playlistLabel, .addTrackBtn:hover, .removeTrackBtn:hover {
     cursor:pointer;
+}
+
+.playlistComponent:hover {
+    background-color: var(--lighter);
+}
+
+.addTrackBtn:hover, .playlistRenameBtn:hover {
+    background-color: var(--lighter);
 }
 
 option:hover,
 option:focus,
 option:active,
 option:checked {
-    background-color: rgb(48, 163, 230);
-    color: white;
+    background-color: var(--lighter);
 }
 
 
@@ -116,10 +144,6 @@ table {
     border-collapse: collapse;
     width: 100%;
     font-size: 0.9em;
-}
-
-.playlistTitle {
-    padding-left: 0.5em;
 }
 
 tr {
@@ -166,6 +190,7 @@ tbody tr:nth-child(odd) {
 .addTrackForm {
     display: flex;
     flex-direction: column;
+    padding-left: 1em;
 }
 
 .removeTrackBtn {

@@ -4,12 +4,13 @@ export class MusicLibraryView {
     constructor(musicLibrary) {
         this.musicLibrary = musicLibrary;
         this.container = null;
+        this.playlistView = null;
     }
 
     async initRender(root) {
         const header = document.createElement("h1");
         header.innerHTML = `Muzicka biblioteka ${this.musicLibrary.owner}`;
-        root.appendChild(header)
+        root.appendChild(header);
 
         const musicLibraryContainer = document.createElement("div");
         musicLibraryContainer.className = "musicLibraryContainer";
@@ -63,12 +64,14 @@ export class MusicLibraryView {
 
             const playlistRenameBtn = document.createElement("button");
             playlistRenameBtn.className = "playlistRenameBtn";
-            playlistRenameBtn.innerText = "Preimenuj";
+            playlistRenameBtn.innerHTML = "Preimenuj";
             playlistRenameBtn.id = playlist.id;
             playlistRenameBtn.addEventListener("click", async(e) => {
                 e.stopPropagation();
-                const newName = prompt("Novi naziv plejliste");
-                e.preventDefault();
+                let newName;
+                do {
+                    newName = prompt("Novi naziv plejliste");
+                } while (newName != null && newName === "")
                 let actionSucceeded = false;
                 actionSucceeded = await this.onBtnRenamePlaylistClick(playlist, newName);
                 if (actionSucceeded) {
@@ -78,7 +81,7 @@ export class MusicLibraryView {
 
             const playlistDeleteBtn = document.createElement("button");
             playlistDeleteBtn.className = "playlistDeleteBtn";
-            playlistDeleteBtn.innerText = "Obrisi";
+            playlistDeleteBtn.innerHTML = "Obrisi";
             playlistDeleteBtn.id = playlist.id;
             playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(playlist, e.target));
 
@@ -118,11 +121,6 @@ export class MusicLibraryView {
         playlistsContainer.appendChild(playlistComponent);
     }
 
-    closeModal(modal) {
-        modal.remove();
-    }
-
-
     //#endregion
 
     //#region event handlers
@@ -154,6 +152,10 @@ export class MusicLibraryView {
 
     async onBtnDeletePlaylistClick(playlist, button) {
         event.stopPropagation();
+
+        if (!confirm(`Sigurno obrisati ${playlist.name}?`))
+            return;
+        
         if (await this.musicLibrary.deletePlaylist(playlist)) {
             const playlistComponent = button.parentElement;
             playlistComponent.remove();
