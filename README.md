@@ -2,6 +2,10 @@
 
 ## Relacioni dijagram
 <img src="erd.jpg" alt="Relacioni dijagram" height="400"/>
+    
+Horizontalni prikaz             |  Vertikalni prikaz
+:-------------------------:|:-------------------------:
+![](ss1.jpg)  |  ![](ss2.jpg)
 
 ## Opis aplikacije
 * Vlasnik muzičke biblioteke dobija grafički prikaz plejlisti koje trenutno ima u biblioteci.
