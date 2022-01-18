@@ -2,12 +2,12 @@
 
 ## Relacioni dijagram
 <img src="erd.jpg" alt="Relacioni dijagram" height="400"/>
-    
+
 Horizontalni prikaz             |  Vertikalni prikaz
 :-------------------------:|:-------------------------:
 ![](ss1.jpg)  |  ![](ss2.jpg)
 
-## Opis aplikacije
+## Aplikacija
 * Vlasnik muzičke biblioteke dobija grafički prikaz plejlisti koje trenutno ima u biblioteci.
 * Ima mogućnost da pravi nove plejliste, da im menja naziv i da ih briše iz biblioteke.
 * Klikom na plejlistu otvara se interfejs na kome može da dodaje i briše pesme iz plejliste.
@@ -16,7 +16,7 @@ Horizontalni prikaz             |  Vertikalni prikaz
 * U tabelarnom prikazu korisnik može interaktivno da menja ocenu pesme od 1 do 5 klikom na kružić
 * Klikom na dugme sa kanticom se briše pesma iz plejliste
 
-## Opis implementacije
+## Implementacija
 ### Klijentski deo
 * Klijentski deo je podeljen na [`Views`](./Client/Views) i [`Models`](./Client/Models)
 #### Views
@@ -24,7 +24,7 @@ Aplikacija je podeljena u 2 View-a: `MusicLibraryView` i `PlaylistView`
 * `MusicLibraryView` je zadužen za grafički prikaz plejlisti i za prikaz dugmića za sve operacije nad plejlistama
 * `PlaylistView` je zadužen za prikaz forme, dugmeta za dodavanje pesme, plejliste, tabele i svih ostalih elemenata
 
-#### [Modeli](./Client/Models)
+#### Modeli
 * `MusicLibrary`, `Artist`, `Release`, `Playlist`,  `Track`
 * Postoji paralela između svih modela osim `PlaylistTrack` na klijentskoj i serverskoj strani, sa sitnim izmenama (samo neophondi atributi prilagođeni prikazu)
 
