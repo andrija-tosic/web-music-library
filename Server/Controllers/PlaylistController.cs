@@ -190,9 +190,9 @@ namespace Controllers
             }
         }
 
-        [Route("AddPlaylist/{id}/{name}")]
+        [Route("AddPlaylist/{id}")]
         [HttpPost]
-        public async Task<ActionResult> AddPlaylist(int id, string name)
+        public async Task<ActionResult> AddPlaylist(int id, [FromBody] string name)
         {
             try
             {

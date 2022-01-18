@@ -31,12 +31,12 @@ export class MusicLibrary {
     }
 
     async addPlaylist(name) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${this.id}/${name}`, {
+        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${this.id}`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            // circular JSON
+            body: JSON.stringify(name)
         });
 
         if (res.ok) {

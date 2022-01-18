@@ -9,7 +9,7 @@ export class MusicLibraryView {
 
     async initRender(root) {
         const header = document.createElement("h1");
-        header.innerHTML = `Muzicka biblioteka ${this.musicLibrary.owner}`;
+        header.innerHTML = `Muzicka biblioteka vlasnika ${this.musicLibrary.owner}`;
         root.appendChild(header);
 
         const musicLibraryContainer = document.createElement("div");
@@ -153,7 +153,7 @@ export class MusicLibraryView {
     async onBtnDeletePlaylistClick(playlist, button) {
         event.stopPropagation();
 
-        if (!confirm(`Sigurno obrisati ${playlist.name}?`))
+        if (!confirm(`Sigurno obrisati "${playlist.name}"?`))
             return;
         
         if (await this.musicLibrary.deletePlaylist(playlist)) {
