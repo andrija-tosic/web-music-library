@@ -51,6 +51,14 @@ export class MusicLibraryView {
 
             playlistComponent.addEventListener("click", async () => {
                 this.playlistView.playlist = playlist;
+
+                const playlistComponents = document.querySelectorAll(".playlistComponent");
+                playlistComponents.forEach(component => {
+                    component.classList.remove("selectedPlaylist");
+                })
+
+                playlistComponent.classList.add("selectedPlaylist");
+
                 await this.playlistView.renderPlaylistSidebar();
             });
 
@@ -92,10 +100,10 @@ export class MusicLibraryView {
             playlistsContainer.appendChild(playlistComponent);
         }
 
-        const playlistComponent = document.createElement("button");
-        playlistComponent.className = "playlistComponent";
+        const addPlaylistComponent = document.createElement("button");
+        addPlaylistComponent.className = "addPlaylistComponent";
 
-        playlistComponent.addEventListener("click", async(e) => {
+        addPlaylistComponent.addEventListener("click", async(e) => {
             e.stopPropagation();
 
             const newPlaylistName = prompt("Naziv nove plejliste:");
@@ -111,14 +119,14 @@ export class MusicLibraryView {
         const addPlaylist = document.createElement("div");
         addPlaylist.className = "addPlaylistImage";
         addPlaylist.innerHTML = "+";
-        playlistComponent.appendChild(addPlaylist);
+        addPlaylistComponent.appendChild(addPlaylist);
 
         const playlistLabel = document.createElement("label");
         playlistLabel.className = "addPlaylistLabel";
         playlistLabel.innerText = "Dodaj novu plejlistu";
 
-        playlistComponent.appendChild(playlistLabel);
-        playlistsContainer.appendChild(playlistComponent);
+        addPlaylistComponent.appendChild(playlistLabel);
+        playlistsContainer.appendChild(addPlaylistComponent);
     }
 
     //#endregion

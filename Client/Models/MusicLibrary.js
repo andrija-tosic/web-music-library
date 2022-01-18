@@ -65,7 +65,7 @@ export class MusicLibrary {
     }
 
     async getArtists() {
-        const res = await fetch(`https://localhost:5001/Artist/GetArtists/${this.id}`, {
+        const res = await fetch(`https://localhost:5001/Artist/GetArtists`, {
             method: "GET"
         });
 
