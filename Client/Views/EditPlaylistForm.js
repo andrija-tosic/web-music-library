@@ -43,27 +43,27 @@ export class EditPlaylistForm {
 
         imageInputDiv.appendChild(imageInput);
 
-        // let deleteImageBtn = null;
+        let deleteImageBtn = document.createElement("button");
+        deleteImageBtn.innerHTML = "Obrisi sliku";
+        deleteImageBtn.className = "playlistDeleteBtn";
+        deleteImageBtn.type = "button";
 
-        // let imageDeleted = false;
+        if (this.playlist.imagePath === null
+        || this.playlist.imagePath === undefined
+        || this.playlist.imagePath === `./res/placeholder_image.jpg`) {
+            deleteImageBtn.style.display = "none";
+        }
 
-        // if (this.playlist.imagePath !== null && this.playlist.imagePath !== undefined) {
-        //     deleteImageBtn = document.createElement("button");
-        //     deleteImageBtn.innerHTML = "Obrisi sliku";
-        //     deleteImageBtn.className = "playlistDeleteBtn"
+        let imageDeleted = false;
 
-        //     if (this.playlist.imagePath === `./res/placeholder_image.jpg`) {
-        //         deleteImageBtn.style.display = "none";
-        //     }
+        deleteImageBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
 
-        //     deleteImageBtn.addEventListener("click", async (e) => {
-        //         e.preventDefault();
+            imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
+            imageDeleted = true;
+            deleteImageBtn.style.display = "none";
+        });
 
-        //         imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
-        //         imageDeleted = true;
-        //         deleteImageBtn.style.display = "none";
-        //     });
-        // }
 
         const submitBtn = document.createElement("button");
         submitBtn.setAttribute("type", "submit");
@@ -84,19 +84,20 @@ export class EditPlaylistForm {
 
             reader.onload = (e) => {
                 imageInputDiv.style.backgroundImage = `url('${reader.result}')`;
+                deleteImageBtn.style.display = "block";
             }
             reader.readAsDataURL(imageInput.files[0]);
-
-
-            // deleteImageBtn = document.createElement("button");
-            // editPlaylistForm.appendChild(deleteImageBtn);
-            // deleteImageBtn.innerHTML = "Obrisi sliku";
-            // deleteImageBtn.className = "playlistDeleteBtn"
-            // deleteImageBtn.style.display = "block";
         });
 
         editPlaylistForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+
+            if (playlistNameInput.value == ""
+                || playlistNameInput.value === null
+                || playlistNameInput.value === undefined) {
+                alert("Unesite naziv.");
+                return;
+            }
 
             const file = imageInput.files[0];
             formData.append("imageInput", file);
@@ -113,17 +114,17 @@ export class EditPlaylistForm {
             if (res.ok) {
                 let imagePath;
 
-                // if (imageDeleted) {
-                //     const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
-                //     const res = await fetch(endpoint, {
-                //         method: "GET"
-                //     });
+                if (imageDeleted) {
+                    //     const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
+                    //     const res = await fetch(endpoint, {
+                    //         method: "GET"
+                    //     });
 
-                //     if (res.ok) {
-                //         console.log('res ok');
-                //         this.playlist.imagePath = `./res/placeholder_image.jpg`;
-                //     }
-                // }
+                    //     if (res.ok) {
+                    //         console.log('res ok');
+                    // }
+                    this.playlist.imagePath = `./res/placeholder_image.jpg`;
+                }
 
                 if (file !== undefined) {
                     imagePath = `./images/${file['name']}`
@@ -168,8 +169,8 @@ export class EditPlaylistForm {
         editPlaylistForm.appendChild(playlistDescriptionInput);
         editPlaylistForm.appendChild(imageInputDiv);
         editPlaylistForm.appendChild(submitBtn);
-        // if (deleteImageBtn)
-        //     editPlaylistForm.appendChild(deleteImageBtn);
+        if (deleteImageBtn)
+            editPlaylistForm.appendChild(deleteImageBtn);
         this.container.appendChild(editPlaylistForm);
         playlistNameInput.focus();
         playlistNameInput.select();

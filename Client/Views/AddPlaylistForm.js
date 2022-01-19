@@ -45,6 +45,24 @@ export class AddPlaylistForm {
         submitBtn.className = "playlistFormBtn";
         submitBtn.innerHTML = "Dodaj";
 
+        let deleteImageBtn = document.createElement("button");
+        deleteImageBtn.innerHTML = "Obrisi sliku";
+        deleteImageBtn.className = "playlistDeleteBtn";
+        deleteImageBtn.type = "button";
+        deleteImageBtn.style.display = "none";
+
+        let imageDeleted = false;
+
+        let imagePath = `./res/placeholder_image.jpg`;
+        
+        deleteImageBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
+            imageDeleted = true;
+            deleteImageBtn.style.display = "none";
+        });
+        
         const endpoint = "upload.php";
         const formData = new FormData();
 
@@ -53,6 +71,7 @@ export class AddPlaylistForm {
 
             reader.onload = (e) => {
                 imageInputDiv.style.backgroundImage = `url('${reader.result}')`;
+                deleteImageBtn.style.display = "block";
             }
             reader.readAsDataURL(imageInput.files[0]);
         });
@@ -64,9 +83,18 @@ export class AddPlaylistForm {
         addPlaylistForm.appendChild(playlistDescriptionInput);
         addPlaylistForm.appendChild(imageInputDiv);
         addPlaylistForm.appendChild(submitBtn);
+        addPlaylistForm.appendChild(deleteImageBtn);
+
 
         addPlaylistForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+
+            if (playlistNameInput.value == ""
+                || playlistNameInput.value === null
+                || playlistNameInput.value === undefined) {
+                alert("Unesite naziv.");
+                return;
+            }
 
             const file = imageInput.files[0];
             formData.append("imageInput", file);
@@ -81,16 +109,27 @@ export class AddPlaylistForm {
                 body: formData
             });
 
-            const res2 = await fetch(endpoint, {
-                method: "post",
-                body: JSON.stringify(this.musicLibrary.id)
-            })
-
-            if (res.ok && res2.ok) {
+            if (res.ok) {
                 let imagePath = `./res/placeholder_image.jpg`;
+                deleteImageBtn.style.display = "block";
+
+                if (imageDeleted) {
+                    //     const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
+                    //     const res = await fetch(endpoint, {
+                    //         method: "GET"
+                    //     });
+
+                    //     if (res.ok) {
+                    //         console.log('res ok');
+                    // }
+                    imagePath = `./res/placeholder_image.jpg`;
+                }
 
                 if (file !== undefined) {
-                    imagePath = `./images/${file['name']}`               
+                    imagePath = `./images/${file['name']}`
+                }
+                else {
+                    imagePath = imagePath;
                 }
 
                 const formData = new FormData(addPlaylistForm);
@@ -100,12 +139,12 @@ export class AddPlaylistForm {
                 formData.append("numberOfTracks", 0);
                 formData.append("length", 0);
 
-                for (var [key, value] of formData.entries()) { 
+                for (var [key, value] of formData.entries()) {
                     console.log(key, value);
                 }
 
                 const playlist = await this.musicLibrary.addPlaylist(formData);
-                
+
                 if (playlist != null) {
                     this.musicLibraryView.playlistView.playlist = playlist;
                     await this.musicLibraryView.renderPlaylistPicker();
