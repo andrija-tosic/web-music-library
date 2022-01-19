@@ -112,17 +112,16 @@ button {
     width: 60%;
     height: 60%;
     border-radius: 8px;
-    /*background-color: var(--light);
-    */
     background-size: cover;
     background-repeat: no-repeat;
-
+    
 }
 
 .addPlaylistImage {
+    background-color: var(--light);
     width: 50%;
     height: 50%;
-    font-size: 3rem;
+    font-size: 6em;
     font-weight: normal;
 }
 
@@ -136,6 +135,7 @@ button {
 
 .addPlaylistLabel {
     margin-top: 1em;
+    font-size: medium;
 }
 
 .playlistComponent:hover, .addPlaylistComponent:hover, .playlistLabel, .addPlaylistLabel, .addTrackBtn:hover, .removeTrackBtn:hover {
