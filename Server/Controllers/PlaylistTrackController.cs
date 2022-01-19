@@ -35,9 +35,20 @@ namespace Controllers
                 }
 
                 Playlist playlist = Context.Playlists.Find(playlistId);
+                if (playlist == null)
+                {
+                    return NotFound("Playlist not found.");
+                }
+
+
                 PlaylistTrack playlistTrack = Context.PlaylistTracks
                 .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
                 .FirstOrDefault();
+
+                if (playlistTrack == null)
+                {
+                    return NotFound("Entry with track and playlist not found");
+                }
 
                 Track track = Context.PlaylistTracks
                 .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)
@@ -45,7 +56,12 @@ namespace Controllers
                 .Select(pt => pt.Track)
                 .FirstOrDefault();
 
-                if (playlistTrack == null || track == null || playlist == null)
+                if (track == null)
+                {
+                    return NotFound("Track not found.");
+                }
+
+                if (playlistTrack == null)
                 {
                     return NotFound($"Such entry with track and playlist {playlistId} not found.");
                 }

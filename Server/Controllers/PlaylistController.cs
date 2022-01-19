@@ -259,7 +259,15 @@ namespace Controllers
                     return BadRequest("Can't add empty named playlist.");
                 }
 
+                if (playlist.Description.Length > 300)
+                    return BadRequest("Description too long");
+
                 MusicLibrary musicLibrary = Context.MusicLibraries.Find(playlist.MusicLibraryId);
+
+                if (musicLibrary == null)
+                {
+                    return BadRequest("Music library not found");
+                }
 
                 Playlist newPlaylist = new Playlist
                 {
