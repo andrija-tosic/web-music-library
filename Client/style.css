@@ -212,6 +212,10 @@ tbody tr:nth-child(odd) {
     padding-left: 1em;
 }
 
+.addPlaylistForm {
+    padding: 2em;
+}
+
 .removeTrackBtn {
     font-size: x-large;
     margin-top: 0;
@@ -241,7 +245,7 @@ input, select, button, textarea {
 }
 
 .imageInputDiv:hover {
-    background-color: #aed4cd;
+    opacity: 0.66;
     cursor: pointer;
 }
 

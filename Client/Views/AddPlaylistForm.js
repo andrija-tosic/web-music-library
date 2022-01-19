@@ -9,11 +9,15 @@ export class AddPlaylistForm {
         const addPlaylistForm = document.createElement("form");
         addPlaylistForm.className = "addPlaylistForm";
 
+        const header = document.createElement("h2");
+        header.innerHTML = "Dodaj plejlistu";
+
         const playlistNameLabel = document.createElement("label");
         playlistNameLabel.innerHTML = "Naziv";
         const playlistNameInput = document.createElement("input");
         playlistNameInput.setAttribute("type", "text");
-        playlistNameInput.value = "Nova plejlista";
+
+        playlistNameInput.value = `Plejlista #${this.musicLibrary.playlists.length + 1}`;
         playlistNameInput.name = "name";
 
         const playlistDescriptionLabel = document.createElement("label");
@@ -23,7 +27,7 @@ export class AddPlaylistForm {
         playlistDescriptionInput.rows = "4";
         playlistDescriptionInput.cols = "50";
         playlistDescriptionInput.setAttribute("type", "text");
-        playlistDescriptionInput.value = "Opis plejliste";
+        playlistDescriptionInput.placeholder = "Neki opis...";
         playlistDescriptionInput.name = "description";
 
         const imageLabel = document.createElement("label");
@@ -42,7 +46,7 @@ export class AddPlaylistForm {
         const submitBtn = document.createElement("button");
         submitBtn.setAttribute("type", "submit");
         submitBtn.className = "playlistFormBtn";
-        submitBtn.innerHTML = "Dodaj plejlistu";
+        submitBtn.innerHTML = "Dodaj";
 
         const endpoint = "upload.php";
         const formData = new FormData();
@@ -56,6 +60,7 @@ export class AddPlaylistForm {
             reader.readAsDataURL(imageInput.files[0]);
         });
 
+        addPlaylistForm.appendChild(header);
         addPlaylistForm.appendChild(playlistNameLabel);
         addPlaylistForm.appendChild(playlistNameInput);
         addPlaylistForm.appendChild(playlistDescriptionLabel);

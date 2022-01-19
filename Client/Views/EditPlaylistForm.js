@@ -32,6 +32,7 @@ export class EditPlaylistForm {
         playlistDescriptionInput.setAttribute("type", "text");
         playlistDescriptionInput.value = this.playlist.description;
         playlistDescriptionInput.name = "description";
+        playlistDescriptionInput.placeholder = "Neki opis..."
 
         const imageLabel = document.createElement("label");
         imageLabel.innerHTML = "Slika";
@@ -45,10 +46,28 @@ export class EditPlaylistForm {
 
         imageInputDiv.appendChild(imageInput);
 
+        let deleteImageBtn = null;
+
+        let imageDeleted = false;
+
+        if (this.playlist.imagePath !== null && this.playlist.imagePath !== undefined) {
+            deleteImageBtn = document.createElement("button");
+            deleteImageBtn.innerHTML = "Obrisi sliku";
+            deleteImageBtn.className = "playlistDeleteBtn"
+            deleteImageBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+
+                imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
+                imageDeleted = true;
+                deleteImageBtn.style.display = "none";
+            });
+        }
+
         const submitBtn = document.createElement("button");
         submitBtn.setAttribute("type", "submit");
         submitBtn.className = "playlistFormBtn";
-        submitBtn.innerHTML = "Izmeni plejlistu";
+        submitBtn.innerHTML = "Sacuvaj izmene";
+
 
         const endpoint = "upload.php";
         const formData = new FormData();
@@ -62,6 +81,8 @@ export class EditPlaylistForm {
                 imageInputDiv.style.backgroundImage = `url('${reader.result}')`;
             }
             reader.readAsDataURL(imageInput.files[0]);
+
+            deleteImageBtn.style.display = "block";
         });
 
         editPlaylistForm.addEventListener("submit", async (e) => {
@@ -81,6 +102,18 @@ export class EditPlaylistForm {
 
             if (res.ok) {
                 let imagePath;
+
+                if (imageDeleted) {
+                    const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
+                    const res = await fetch(endpoint, {
+                        method: "GET"
+                    });
+
+                    if (res.ok) {
+                        console.log('res ok');
+                        this.playlist.imagePath = null;
+                    }
+                }
 
                 if (file !== undefined) {
                     imagePath = `./images/${file['name']}`
@@ -123,6 +156,8 @@ export class EditPlaylistForm {
         editPlaylistForm.appendChild(imageLabel);
         editPlaylistForm.appendChild(imageInputDiv);
         editPlaylistForm.appendChild(submitBtn);
+        if (deleteImageBtn)
+            editPlaylistForm.appendChild(deleteImageBtn);
         this.container.appendChild(editPlaylistForm);
     }
 }

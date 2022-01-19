@@ -40,7 +40,7 @@ export class PlaylistView {
         const playlistTitle = document.createElement("h1");
         const playlistInfo = document.createElement("h3");
         const paragraph = document.createElement("p");
-        //paragraph.innerHTML = this.playlist.description;
+        paragraph.innerHTML = "Nema opisa";
         const tbody = document.createElement("tbody");
 
         await this.renderAddTrackForm(playlistSidebar, playlistTitle, paragraph, playlistInfo, tbody);
