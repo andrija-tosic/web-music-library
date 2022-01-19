@@ -99,7 +99,7 @@ button {
     background-color: var(--lighter);
 }
 
-.editPlaylistForm {
+.addPlaylistForm, .editPlaylistForm {
     padding:2em;
 }
 
@@ -206,14 +206,10 @@ tbody tr:nth-child(odd) {
       white-space: nowrap;
   }
 
-.addPlaylistForm, .addTrackForm {
+.addPlaylistForm, .editPlaylistForm, .addTrackForm {
     display: flex;
     flex-direction: column;
     padding-left: 1em;
-}
-
-.addPlaylistForm {
-    padding: 5em;
 }
 
 .removeTrackBtn {

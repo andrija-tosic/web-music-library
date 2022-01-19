@@ -6,6 +6,7 @@
 Horizontalni prikaz             |  Vertikalni prikaz
 :-------------------------:|:-------------------------:
 ![](ss1.jpg)  |  ![](ss2.jpg)
+![](ss3.jpg)
 
 ## Aplikacija
 * Vlasnik muzičke biblioteke dobija grafički prikaz plejlisti koje trenutno ima u biblioteci.

@@ -22,6 +22,7 @@ export class EditPlaylistForm {
         playlistNameInput.setAttribute("type", "text");
         playlistNameInput.value = this.playlist.name;
         playlistNameInput.name = "name";
+        playlistNameInput.required = true;
 
         const playlistDescriptionLabel = document.createElement("label");
         playlistDescriptionLabel.innerHTML = "Opis";
@@ -49,8 +50,8 @@ export class EditPlaylistForm {
         deleteImageBtn.type = "button";
 
         if (this.playlist.imagePath === null
-        || this.playlist.imagePath === undefined
-        || this.playlist.imagePath === `./res/placeholder_image.jpg`) {
+            || this.playlist.imagePath === undefined
+            || this.playlist.imagePath === `./res/placeholder_image.jpg`) {
             deleteImageBtn.style.display = "none";
         }
 

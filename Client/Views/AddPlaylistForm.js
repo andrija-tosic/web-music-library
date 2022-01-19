@@ -16,6 +16,7 @@ export class AddPlaylistForm {
         playlistNameLabel.innerHTML = "Naziv";
         const playlistNameInput = document.createElement("input");
         playlistNameInput.setAttribute("type", "text");
+        playlistNameInput.required = true;
 
         playlistNameInput.value = `Plejlista #${this.musicLibrary.playlists.length + 1}`;
         playlistNameInput.name = "name";
