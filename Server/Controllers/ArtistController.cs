@@ -36,6 +36,7 @@ namespace Controllers
                         a.ArtistName
                     })
                     .Where(a => a.ArtistName.Contains(match))
+                    .OrderBy(a => a.ArtistName)
                     .Take(10)
                     .ToListAsync();
 

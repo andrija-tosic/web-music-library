@@ -261,6 +261,18 @@ export class PlaylistView {
 
         addTrackBtn.addEventListener("click", async (e) => {
             e.preventDefault();
+
+            if (artistInput.value == "" || artistInput.value === null
+            || artistInput.value === undefined) {
+                alert("Unesite nekog umetnika.");
+                return;
+            }
+
+            if (trackSelect.selectedOptions.length == 0) {
+                alert("Izaberite neku pesmu.");
+                return;
+            }
+
             const trackIds = Array.from(trackSelect.selectedOptions)
                 .map(option => option.value)
 

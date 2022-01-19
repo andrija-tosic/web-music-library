@@ -253,13 +253,13 @@ namespace Controllers
                 {
                     return BadRequest("ID out of range");
                 }
-
-                MusicLibrary musicLibrary = Context.MusicLibraries.Find(playlist.MusicLibraryId);
-
+               
                 if (string.IsNullOrEmpty(playlist.Name) || string.IsNullOrWhiteSpace(playlist.Name))
                 {
                     return BadRequest("Can't add empty named playlist.");
                 }
+
+                MusicLibrary musicLibrary = Context.MusicLibraries.Find(playlist.MusicLibraryId);
 
                 Playlist newPlaylist = new Playlist
                 {

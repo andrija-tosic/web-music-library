@@ -28,6 +28,11 @@ namespace Controllers
                     return BadRequest("ID out of range");
                 }
 
+                if (rating < 1 || rating > 5)
+                {
+                    return BadRequest("Rating out of range");
+                }
+
                 var track = await Context.Tracks.FindAsync(id);
                 if (track != null)
                 {
