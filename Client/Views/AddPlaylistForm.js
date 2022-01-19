@@ -85,7 +85,7 @@ export class AddPlaylistForm {
             });
 
             if (res.ok) {
-                let imagePath = null;
+                let imagePath = `./res/placeholder_image.jpg`;
 
                 if (file !== undefined) {
                     imagePath = `./images/${file['name']}`               
@@ -114,5 +114,7 @@ export class AddPlaylistForm {
         });
 
         this.container.appendChild(addPlaylistForm);
+        playlistNameInput.focus();
+        playlistNameInput.select();
     }
 }

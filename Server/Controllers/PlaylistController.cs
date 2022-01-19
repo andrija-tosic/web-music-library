@@ -266,6 +266,7 @@ namespace Controllers
                     Name = playlist.Name,
                     NumberOfTracks = 0,
                     Length = 0,
+                    ImagePath = playlist.ImagePath,
                     MusicLibraryId = musicLibrary.Id
                 };
 

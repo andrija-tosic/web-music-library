@@ -44,10 +44,14 @@ export class MusicLibraryView {
         if (!this.musicLibrary.playlists || this.musicLibrary.playlists.length == 0)
             await this.musicLibrary.getPlaylists();
 
-        for (const playlist of this.musicLibrary.playlists) {
+        const ppp = this.musicLibrary.playlists.slice();
+        console.log(ppp, "ppp");
 
+        for (const playlist of this.musicLibrary.playlists) {
             const playlistComponent = document.createElement("button");
             playlistComponent.className = "playlistComponent";
+
+            console.log(playlist.musicLibraryId);
 
             playlistComponent.addEventListener("click", async () => {
                 this.playlistView.playlist = playlist;
@@ -60,6 +64,8 @@ export class MusicLibraryView {
 
                 playlistComponent.classList.add("selectedPlaylist");
 
+                console.log(playlist.musicLibraryId);
+
                 if (playlist.description === null || playlist.description === undefined) {
                     await playlist.getFullPlaylistInfo();
                 }
@@ -68,16 +74,18 @@ export class MusicLibraryView {
                 await this.playlistView.renderPlaylistSidebar();
             });
 
+            console.log(playlist.musicLibraryId);
+
             const playlistImage = document.createElement("div");
             playlistImage.className = "playlistImage";
-            
+
             if (playlist.imagePath === null || playlist.imagePath === undefined) {
                 playlistImage.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
             }
             else {
                 playlistImage.style.backgroundImage = `url('${playlist.imagePath}')`;
             }
-            
+
             playlistComponent.appendChild(playlistImage);
 
             const playlistLabel = document.createElement("label");
@@ -90,11 +98,15 @@ export class MusicLibraryView {
             playlistEditBtn.addEventListener("click", async (e) => {
                 e.stopPropagation();
 
+                console.log(playlist.musicLibraryId);
+
                 const playlistComponents = document.querySelectorAll(".playlistComponent");
                 playlistComponents.forEach(component => {
                     component.classList.remove("selectedPlaylist");
                 });
                 playlistComponent.classList.add("selectedPlaylist");
+
+                console.log(playlist.musicLibraryId);
 
                 if (playlist.description === null || playlist.description === undefined) {
                     await playlist.getFullPlaylistInfo();

@@ -41,8 +41,6 @@ export class Playlist {
             this.description = playlist.description;
             this.imagePath = playlist.imagePath;
 
-            console.log(playlist);
-
             if (playlist.length == null)
                 this.length = 0;
             else
@@ -60,7 +58,7 @@ export class Playlist {
     }
 
     async editPlaylist(formData) {
-        console.log(this, "before");
+        console.log(this.musicLibraryId, "before");
         const res = await fetch(`https://localhost:5001/Playlist/EditPlaylist/`, {
             method: "PUT",
             body: formData
@@ -70,7 +68,7 @@ export class Playlist {
         this.description = formData.get("description");
         this.imagePath = formData.get("imagePath");
 
-        console.log(this, "after");
+        console.log(this.musicLibraryId, "after");
 
         return res;
     }

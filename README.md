@@ -40,5 +40,5 @@ Aplikacija je podeljena u 2 View-a: `MusicLibraryView` i `PlaylistView`
 * `MusicLibrary`, `Artist`, `Release`, `Playlist`,  `Track`, `PlaylistTrack`
 #### [Kontroleri](./Server/Controllers)
 * Dodavanje i brisanje pesama iz plejliste podrazumeva izračunavanje i ažuriranje atributa (dužinu i broj pesama), kao i ažuriranje rednog broja pesama u plejlisti.
-* Server vraća odgovarajuće kodove (`400`, `404`, `415`, `500`) ako nema traženih podataka u bazi ili dođe do neke greške.
+* Server vraća odgovarajuće kodove (`304`, `400`, `404`, `415`, `500`) ako nema traženih podataka u bazi ili dođe do neke greške.
 * Izvođači, izdanja i pesme se vraćaju sa servera u uređenom redosledu

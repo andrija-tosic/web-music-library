@@ -54,6 +54,11 @@ export class EditPlaylistForm {
             deleteImageBtn = document.createElement("button");
             deleteImageBtn.innerHTML = "Obrisi sliku";
             deleteImageBtn.className = "playlistDeleteBtn"
+
+            if (this.playlist.imagePath === `./res/placeholder_image.jpg`) {
+                deleteImageBtn.style.display = "none";
+            }
+
             deleteImageBtn.addEventListener("click", async (e) => {
                 e.preventDefault();
 
@@ -111,7 +116,7 @@ export class EditPlaylistForm {
 
                     if (res.ok) {
                         console.log('res ok');
-                        this.playlist.imagePath = null;
+                        this.playlist.imagePath = `./res/placeholder_image.jpg`;
                     }
                 }
 
@@ -124,6 +129,7 @@ export class EditPlaylistForm {
 
                 const formData = new FormData(editPlaylistForm);
 
+
                 formData.append("id", this.playlist.id);
                 formData.append("imagePath", imagePath);
                 formData.append("musicLibraryId", this.playlist.musicLibraryId);
@@ -133,6 +139,8 @@ export class EditPlaylistForm {
                 for (var [key, value] of formData.entries()) {
                     console.log(key, value);
                 }
+
+                console.log(this.playlist.musicLibraryId);
 
                 const res = await this.playlist.editPlaylist(formData);
 
@@ -159,5 +167,7 @@ export class EditPlaylistForm {
         if (deleteImageBtn)
             editPlaylistForm.appendChild(deleteImageBtn);
         this.container.appendChild(editPlaylistForm);
+        playlistNameInput.focus();
+        playlistNameInput.select();
     }
 }
