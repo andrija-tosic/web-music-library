@@ -34,9 +34,6 @@ export class EditPlaylistForm {
         playlistDescriptionInput.name = "description";
         playlistDescriptionInput.placeholder = "Neki opis..."
 
-        const imageLabel = document.createElement("label");
-        imageLabel.innerHTML = "Slika";
-
         const imageInputDiv = document.createElement("div");
         imageInputDiv.className = "imageInputDiv";
 
@@ -46,27 +43,27 @@ export class EditPlaylistForm {
 
         imageInputDiv.appendChild(imageInput);
 
-        let deleteImageBtn = null;
+        // let deleteImageBtn = null;
 
-        let imageDeleted = false;
+        // let imageDeleted = false;
 
-        if (this.playlist.imagePath !== null && this.playlist.imagePath !== undefined) {
-            deleteImageBtn = document.createElement("button");
-            deleteImageBtn.innerHTML = "Obrisi sliku";
-            deleteImageBtn.className = "playlistDeleteBtn"
+        // if (this.playlist.imagePath !== null && this.playlist.imagePath !== undefined) {
+        //     deleteImageBtn = document.createElement("button");
+        //     deleteImageBtn.innerHTML = "Obrisi sliku";
+        //     deleteImageBtn.className = "playlistDeleteBtn"
 
-            if (this.playlist.imagePath === `./res/placeholder_image.jpg`) {
-                deleteImageBtn.style.display = "none";
-            }
+        //     if (this.playlist.imagePath === `./res/placeholder_image.jpg`) {
+        //         deleteImageBtn.style.display = "none";
+        //     }
 
-            deleteImageBtn.addEventListener("click", async (e) => {
-                e.preventDefault();
+        //     deleteImageBtn.addEventListener("click", async (e) => {
+        //         e.preventDefault();
 
-                imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
-                imageDeleted = true;
-                deleteImageBtn.style.display = "none";
-            });
-        }
+        //         imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
+        //         imageDeleted = true;
+        //         deleteImageBtn.style.display = "none";
+        //     });
+        // }
 
         const submitBtn = document.createElement("button");
         submitBtn.setAttribute("type", "submit");
@@ -76,6 +73,9 @@ export class EditPlaylistForm {
 
         const endpoint = "upload.php";
         const formData = new FormData();
+
+        if (this.playlist.imagePath === null)
+            this.playlist.imagePath = "./res/placeholder_image.jpg"
 
         imageInputDiv.style.backgroundImage = `url('${this.playlist.imagePath}')`;
 
@@ -87,7 +87,12 @@ export class EditPlaylistForm {
             }
             reader.readAsDataURL(imageInput.files[0]);
 
-            deleteImageBtn.style.display = "block";
+
+            // deleteImageBtn = document.createElement("button");
+            // editPlaylistForm.appendChild(deleteImageBtn);
+            // deleteImageBtn.innerHTML = "Obrisi sliku";
+            // deleteImageBtn.className = "playlistDeleteBtn"
+            // deleteImageBtn.style.display = "block";
         });
 
         editPlaylistForm.addEventListener("submit", async (e) => {
@@ -108,17 +113,17 @@ export class EditPlaylistForm {
             if (res.ok) {
                 let imagePath;
 
-                if (imageDeleted) {
-                    const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
-                    const res = await fetch(endpoint, {
-                        method: "GET"
-                    });
+                // if (imageDeleted) {
+                //     const endpoint = `delete.php?imagePath=${this.playlist.imagePath}`;
+                //     const res = await fetch(endpoint, {
+                //         method: "GET"
+                //     });
 
-                    if (res.ok) {
-                        console.log('res ok');
-                        this.playlist.imagePath = `./res/placeholder_image.jpg`;
-                    }
-                }
+                //     if (res.ok) {
+                //         console.log('res ok');
+                //         this.playlist.imagePath = `./res/placeholder_image.jpg`;
+                //     }
+                // }
 
                 if (file !== undefined) {
                     imagePath = `./images/${file['name']}`
@@ -161,11 +166,10 @@ export class EditPlaylistForm {
         editPlaylistForm.appendChild(playlistNameInput);
         editPlaylistForm.appendChild(playlistDescriptionLabel);
         editPlaylistForm.appendChild(playlistDescriptionInput);
-        editPlaylistForm.appendChild(imageLabel);
         editPlaylistForm.appendChild(imageInputDiv);
         editPlaylistForm.appendChild(submitBtn);
-        if (deleteImageBtn)
-            editPlaylistForm.appendChild(deleteImageBtn);
+        // if (deleteImageBtn)
+        //     editPlaylistForm.appendChild(deleteImageBtn);
         this.container.appendChild(editPlaylistForm);
         playlistNameInput.focus();
         playlistNameInput.select();

@@ -30,9 +30,6 @@ export class AddPlaylistForm {
         playlistDescriptionInput.placeholder = "Neki opis...";
         playlistDescriptionInput.name = "description";
 
-        const imageLabel = document.createElement("label");
-        imageLabel.innerHTML = "Slika";
-
         const imageInputDiv = document.createElement("div");
         imageInputDiv.className = "imageInputDiv";
         imageInputDiv.style.backgroundImage = `url('./res/placeholder_image.jpg')`
@@ -65,7 +62,6 @@ export class AddPlaylistForm {
         addPlaylistForm.appendChild(playlistNameInput);
         addPlaylistForm.appendChild(playlistDescriptionLabel);
         addPlaylistForm.appendChild(playlistDescriptionInput);
-        addPlaylistForm.appendChild(imageLabel);
         addPlaylistForm.appendChild(imageInputDiv);
         addPlaylistForm.appendChild(submitBtn);
 
@@ -74,6 +70,7 @@ export class AddPlaylistForm {
 
             const file = imageInput.files[0];
             formData.append("imageInput", file);
+            formData.append("musicLibraryId", this.musicLibrary.id);
 
             if (file && file['type'].split('/')[0] !== 'image') {
                 alert("Fajl nije slika!");
@@ -84,7 +81,12 @@ export class AddPlaylistForm {
                 body: formData
             });
 
-            if (res.ok) {
+            const res2 = await fetch(endpoint, {
+                method: "post",
+                body: JSON.stringify(this.musicLibrary.id)
+            })
+
+            if (res.ok && res2.ok) {
                 let imagePath = `./res/placeholder_image.jpg`;
 
                 if (file !== undefined) {

@@ -9,7 +9,7 @@ Horizontalni prikaz             |  Vertikalni prikaz
 
 ## Aplikacija
 * Vlasnik muzičke biblioteke dobija grafički prikaz plejlisti koje trenutno ima u biblioteci.
-* Ima mogućnost da pravi nove plejliste, da im menja naziv i da ih briše iz biblioteke.
+* Ima mogućnost da pravi nove plejliste, da im menja naziv, naslovnu sliku i da ih briše iz biblioteke.
 * Klikom na plejlistu otvara se interfejs na kome može da dodaje i briše pesme iz plejliste.
 * U tom delu interfejsa, na formi bira izvođača, jedno njegovo izdanje i proizvoljan broj pesama iz izabranog izdanja koje može da doda u plejlistu.
 * Pesme koje pripadaju plejlisti su tabelarno prikazane.
@@ -20,7 +20,8 @@ Horizontalni prikaz             |  Vertikalni prikaz
 ### Klijentski deo
 * Klijentski deo je podeljen na [`Views`](./Client/Views) i [`Models`](./Client/Models)
 #### Views
-Aplikacija je podeljena u 2 View-a: `MusicLibraryView` i `PlaylistView`
+* Aplikacija je podeljena u 2 glavna View-a: `MusicLibraryView` i `PlaylistView`
+* `PlaylistView` manipuliše sa formom `AddPlaylistForm` za dodavanje plejliste i sa formom `EditPlaylistForm` za izmenu iste
 * `MusicLibraryView` je zadužen za grafički prikaz plejlisti i za prikaz dugmića za sve operacije nad plejlistama
 * `PlaylistView` je zadužen za prikaz forme, dugmeta za dodavanje pesme, plejliste, tabele i svih ostalih elemenata
 
@@ -30,10 +31,10 @@ Aplikacija je podeljena u 2 View-a: `MusicLibraryView` i `PlaylistView`
 
 #### Rad sa podacima
 * Za sve funkcije na serverskoj strani postoji paralelna funkcija na klijentskoj strani
-* Validira se unos za naziv plejliste i na klijentskoj i na serverskoj strani, dodavanje duplikata u plejlistu i brisanje plejliste
-* Izbegavao sam, gde mogu, korišćenje querySelector-a, i trudio se da reference na HTML elemente prenosim preko parametara funkcije.
+* Validira se unos za naziv plejliste i vrsta datoteke koja se uploaduje. Postoji provera za dodavanje duplikata u plejlistu i brisanje plejliste
 * Svi podaci koji su prethodno pribavljeni iz baze se čuvaju u memoriji i koriste ponovo iz memorije (prvo se proverava da li ih ima), tako se baza ne preopterećuje i ne šalju nepotrebni novi zahtevi ka njoj.
-* Umesto iscrtavanja celog izgleda ispočetka, na referencu HTML elementa se novi elementi `append`-uju, a postojeci se brišu preko `.remove()`
+* Upload slika realizovan je preko `fetch`-a i ugradjene klase `FormData`, i kratke `php` skripte.
+* Slike se čuvaju na web serveru a njihove adrese u bazi podataka.
 
 ### Serverski deo
 #### [Modeli](./Server/Models)
