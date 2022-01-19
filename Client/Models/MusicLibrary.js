@@ -23,30 +23,27 @@ export class MusicLibrary {
         this.playlists = [];
 
         data.forEach(playlist => {
-            let p = new Playlist(playlist.id, playlist.name, playlist.numberOfTracks, playlist.length, null, this);
+            let p = new Playlist(playlist.id, playlist.name, null, playlist.imagePath, null, null, null, this.id);
             this.playlists.push(p);
         });
 
         return this.playlists;
     }
 
-    async addPlaylist(name) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/${this.id}`, {
+    async addPlaylist(formData) {
+        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/`, {
             method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(name)
+            body: formData
         });
 
         if (res.ok) {
             const data = await res.json();
-            const playlist = new Playlist(data.id, data.name, data.numberOfTracks, data.length, null, this);
+            const playlist = new Playlist(data.id, data.name, data.description, data.imagePath, data.numberOfTracks, data.length, null, this);
             this.playlists.push(playlist);
-            return true;
+            return playlist;
         }
         else {
-            return false;
+            return null;
         }
     }
 
@@ -62,6 +59,23 @@ export class MusicLibrary {
         else {
             return false;
         }
+    }
+
+    async matchArtists(match) {
+        const res = await fetch(`https://localhost:5001/Artist/MatchArtists/${match}`, {
+            method: "GET"
+        });
+
+        if (res.ok) {
+            let data = await res.json();
+            this.artists = [];
+            data.forEach(artist => {
+                this.artists.push(new Artist(artist.id, null, null, artist.artistName, null));
+            })
+            return this.artists;
+        }
+        else
+            return null;
     }
 
     async getArtists() {

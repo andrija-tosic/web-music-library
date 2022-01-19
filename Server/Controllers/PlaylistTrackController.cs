@@ -24,6 +24,16 @@ namespace Controllers
         {
             try
             {
+                if (trackNumber < 1)
+                {
+                    return BadRequest("Track number out of range");
+                }
+
+                if (playlistId < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
                 Playlist playlist = Context.Playlists.Find(playlistId);
                 PlaylistTrack playlistTrack = Context.PlaylistTracks
                 .Where(pt => pt.TrackNumber == trackNumber && pt.Playlist.Id == playlistId)

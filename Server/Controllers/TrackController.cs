@@ -23,6 +23,11 @@ namespace Controllers
         {
             try
             {
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
                 var track = await Context.Tracks.FindAsync(id);
                 if (track != null)
                 {
@@ -49,6 +54,11 @@ namespace Controllers
         {
             try
             {
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+                
                 var tracks = await Context.Tracks.Where(t => t.Release.Id == id).ToListAsync();
 
                 if (tracks.Count == 0)

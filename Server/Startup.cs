@@ -42,7 +42,11 @@ namespace web_music_library
                         "http://localhost:5500",
                         "https://localhost:5500",
                         "http://127.0.0.1:5500",
-                        "https://127.0.0.1:5500"
+                        "https://127.0.0.1:5500",
+                        "http://localhost:8000",
+                        "https://localhost:8000",
+                        "http://127.0.0.1:8000",
+                        "https://127.0.0.1:8000"
                     })
                     .AllowAnyHeader()
                     .AllowAnyMethod();

@@ -18,6 +18,40 @@ namespace Controllers
             Context = context;
         }
 
+        [Route("MatchArtists/{match}")]
+        [HttpGet]
+        public async Task<ActionResult> MatchArtists(string match)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(match) || string.IsNullOrWhiteSpace(match))
+                {
+                    return BadRequest("String in invalid format");
+                }
+
+                var matches = await Context.Artists.Select(a =>
+                    new
+                    {
+                        a.Id,
+                        a.ArtistName
+                    })
+                    .Where(a => a.ArtistName.Contains(match))
+                    .Take(10)
+                    .ToListAsync();
+
+                if (matches.Count == 0)
+                {
+                    return NotFound($"No such artists with match: {match}");
+                }
+
+                return Ok(matches);
+            }
+            catch (System.Exception e)
+            {
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
         [Route("GetArtists")]
         [HttpGet]
         public async Task<ActionResult> GetArtists()

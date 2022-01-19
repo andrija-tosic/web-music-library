@@ -24,11 +24,12 @@ namespace Controllers
         {
             try
             {
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
                 var query = Context.PlaylistTracks
-                .Include(pt => pt.Playlist)
-                .Include(pt => pt.Track)
-                .ThenInclude(t => t.Release)
-                .ThenInclude(r => r.Artists)
                 .Where(pt => pt.Playlist.Id == id);
 
                 var objects = await query.Select(pt =>
@@ -53,27 +54,34 @@ namespace Controllers
             }
         }
 
-        [Route("RenamePlaylist/{id}/{name}")]
-        [HttpPatch]
-        public async Task<ActionResult> RenamePlaylist(int id, string name)
+        [Route("EditPlaylist")]
+        [HttpPut]
+        public async Task<ActionResult> EditPlaylist([FromForm] Playlist playlist)
         {
             try
             {
-                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                if (playlist.Id < 1)
                 {
-                    return BadRequest("Invalid and empty string.");
+                    return BadRequest("ID out of range");
                 }
 
-                var playlist = await Context.Playlists.FindAsync(id);
-                if (playlist.Name != name)
+                if (string.IsNullOrEmpty(playlist.Name) || string.IsNullOrWhiteSpace(playlist.Name))
                 {
-                    playlist.Name = name;
+                    return BadRequest("Invalid and empty name.");
+                }
+
+                var p = await Context.Playlists.FindAsync(playlist.Id);
+                if (p.Name != playlist.Name || p.Description != playlist.Description || p.ImagePath != playlist.ImagePath)
+                {
+                    p.Name = playlist.Name;
+                    p.Description = playlist.Description;
+                    p.ImagePath = playlist.ImagePath;
                     await Context.SaveChangesAsync();
-                    return Ok($"Playlist name with id {id} changed to {name}.");
+                    return Ok($"Playlist with id {p.Id} attributes changed.");
                 }
                 else
                 {
-                    return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status304NotModified, "Playlist name is the same.");
+                    return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status304NotModified, "Playlist attributes are the same.");
                 }
             }
             catch (System.Exception e)
@@ -99,6 +107,19 @@ namespace Controllers
         {
             try
             {
+                foreach (int id in trackIds)
+                {
+                    if (id < 1)
+                    {
+                        return BadRequest("Track ID out of range");
+                    }
+                }
+
+                if (playlistId < 1)
+                {
+                    return BadRequest("Playlist ID out of range");
+                }
+
                 var tracks = await Context.Tracks.Where(t => trackIds.Contains(t.Id)).ToListAsync();
                 Playlist playlist = await Context.Playlists.FindAsync(playlistId);
 
@@ -164,7 +185,12 @@ namespace Controllers
         {
             try
             {
-                var playlists = await Context.Playlists.Where(p => p.MusicLibrary.Id == id).ToListAsync();
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
+                var playlists = await Context.Playlists.Where(p => p.MusicLibraryId == id).ToListAsync();
 
                 if (playlists.Count() == 0)
                 {
@@ -172,12 +198,13 @@ namespace Controllers
                 }
 
                 var retVal = Context.Playlists
-                    .Where(p => p.MusicLibrary.Id == id)
+                    .Where(p => p.MusicLibraryId == id)
                     .Select(p =>
                     new
                     {
                         p.Id,
                         p.Name,
+                        p.ImagePath,
                         p.NumberOfTracks,
                         p.Length
                     });
@@ -190,25 +217,56 @@ namespace Controllers
             }
         }
 
-        [Route("AddPlaylist/{id}")]
-        [HttpPost]
-        public async Task<ActionResult> AddPlaylist(int id, [FromBody] string name)
+        [Route("GetFullPlaylistInfo/{id}")]
+        [HttpGet]
+        public async Task<ActionResult> GetFullPlaylistInfo(int id)
         {
             try
             {
-                MusicLibrary musicLibrary = Context.MusicLibraries.Find(id);
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
 
-                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                Playlist playlist = await Context.Playlists.Where(p => p.Id == id).SingleAsync();
+
+                if (playlist == null)
+                {
+                    return NotFound("No playlist was found.");
+                }
+
+                return Ok(playlist);
+            }
+            catch (System.Exception e)
+            {
+                return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [Route("AddPlaylist")]
+        [HttpPost]
+        public async Task<ActionResult> AddPlaylist([FromForm] Playlist playlist)
+        {
+            try
+            {
+                if (playlist.MusicLibraryId < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
+                MusicLibrary musicLibrary = Context.MusicLibraries.Find(playlist.MusicLibraryId);
+
+                if (string.IsNullOrEmpty(playlist.Name) || string.IsNullOrWhiteSpace(playlist.Name))
                 {
                     return BadRequest("Can't add empty named playlist.");
                 }
 
                 Playlist newPlaylist = new Playlist
                 {
-                    Name = name,
+                    Name = playlist.Name,
                     NumberOfTracks = 0,
                     Length = 0,
-                    MusicLibrary = musicLibrary
+                    MusicLibraryId = musicLibrary.Id
                 };
 
                 Context.Playlists.Add(newPlaylist);
@@ -229,6 +287,16 @@ namespace Controllers
         {
             try
             {
+                if (musicLibraryId < 1)
+                {
+                    return BadRequest("MusicLibrary ID out of range");
+                }
+
+                if (playlistId < 1)
+                {
+                    return BadRequest("Playlist ID out of range");
+                }
+
                 var playlist = Context.Playlists.Find(playlistId);
 
                 if (playlist == null)

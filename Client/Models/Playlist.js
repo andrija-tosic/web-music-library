@@ -1,13 +1,15 @@
 import {Track} from "../Models/Track.js";
 
 export class Playlist {
-    constructor(id, name, numberOfTracks, length, tracks, musicLibrary) {
+    constructor(id, name, description, imagePath, numberOfTracks, length, tracks, musicLibraryId) {
         this.id = id;
         this.name = name;
+        this.description = description;
+        this.imagePath = imagePath;
         this.numberOfTracks = numberOfTracks;
         this.length = length;
         this.tracks = tracks;
-        this.musicLibrary = musicLibrary;
+        this.musicLibraryId = musicLibraryId;
     }
 
     async loadPlaylistTracks() {
@@ -28,18 +30,49 @@ export class Playlist {
         return this.tracks;
     }
 
-    async renamePlaylist(name) {
-        const res = await fetch(`https://localhost:5001/Playlist/RenamePlaylist/${this.id}/${name}`, {
-            method: "PATCH"
+    async getFullPlaylistInfo() {
+        const res = await fetch(`https://localhost:5001/Playlist/GetFullPlaylistInfo/${this.id}`, {
+            method: "GET",
         });
 
         if (res.ok) {
-            this.name = name;
+            const playlist = await res.json();
+            this.name = playlist.name;
+            this.description = playlist.description;
+            this.imagePath = playlist.imagePath;
+
+            console.log(playlist);
+
+            if (playlist.length == null)
+                this.length = 0;
+            else
+                this.length = playlist.length;
+            
+            if (playlist.numberOfTracks == null)
+                this.numberOfTracks = 0;
+            else
+                this.numberOfTracks = playlist.numberOfTracks;
             return true;
         }
         else {
             return false;
         }
+    }
+
+    async editPlaylist(formData) {
+        console.log(this, "before");
+        const res = await fetch(`https://localhost:5001/Playlist/EditPlaylist/`, {
+            method: "PUT",
+            body: formData
+        });
+
+        this.name = formData.get("name");
+        this.description = formData.get("description");
+        this.imagePath = formData.get("imagePath");
+
+        console.log(this, "after");
+
+        return res;
     }
 
     async removeTrackFromPlaylist(track) {

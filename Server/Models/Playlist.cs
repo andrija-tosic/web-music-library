@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Models
@@ -14,6 +15,11 @@ namespace Models
         [MaxLength(30)]
         public string Name { get; set; }
 
+        [MaxLength(300)]
+        public string Description { get; set; }
+
+        public string ImagePath { get; set; }
+
         public int? NumberOfTracks { get; set; }
 
         public int? Length { get; set; }
@@ -22,6 +28,7 @@ namespace Models
         public List<PlaylistTrack> PlaylistTracks { get; set; }
         
         [Required]
-        public MusicLibrary MusicLibrary { get; set; }
+        [ForeignKey("MusicLibraryId")]
+        public int MusicLibraryId { get; set; }
     }
 }

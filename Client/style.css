@@ -45,7 +45,7 @@ button {
     order: 0;
     background-color: var(--bg);
     display: flex;
-    flex: 50%;
+    flex: 60%;
     flex-direction: row;
     flex-wrap: wrap;
     align-content: flex-start;
@@ -65,7 +65,7 @@ button {
 .playlistSidebar {
     order: 1;
     height: 100%;
-    flex: 50%;
+    flex: 40%;
     background-color: var(--bg);
     box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.1);
     z-index: 1;
@@ -80,16 +80,18 @@ button {
 
 .playlistComponent, .addPlaylistComponent {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-direction: column;
     align-content: center;
     flex: 0 0 auto;
     justify-content: center;
+    align-items: center;
     background-color:  var(--main);
-    width: 10em;
-    height: 10em;
+    width: 15em;
+    height: 15em;
     margin: .5em;
-    overflow: hidden;
     padding: 1em;
+    overflow: hidden;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.25);
 }
 
@@ -97,19 +99,24 @@ button {
     background-color: var(--lighter);
 }
 
+.editPlaylistForm {
+    padding:2em;
+}
+
 .playlistImage, .addPlaylistImage {
-    display: flex;
     align-self: center;
     align-content: center;
     justify-content: center;
     align-items: center;
     vertical-align: middle;
-    min-width: 50%;
-    max-width: 90%;
-    height: 50%;
+    width: 60%;
+    height: 60%;
     border-radius: 8px;
-    background-color: var(--light);
-    font-weight:bold;
+    /*background-color: var(--light);
+    */
+    background-size: cover;
+    background-repeat: no-repeat;
+
 }
 
 .addPlaylistImage {
@@ -120,8 +127,11 @@ button {
 }
 
 .artistLabel, .playlistLabel {
+    font-weight:bold;
     text-align: center;
     overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .addPlaylistLabel {
@@ -136,7 +146,7 @@ button {
     background-color: var(--lighter);
 }
 
-.addTrackBtn:hover, .addPlaylistComponent:hover, .playlistRenameBtn:hover {
+.addTrackBtn:hover, .addPlaylistComponent:hover, .playlistEditBtn:hover {
     background-color: var(--lighter);
 }
 
@@ -196,7 +206,7 @@ tbody tr:nth-child(odd) {
       white-space: nowrap;
   }
 
-.addTrackForm {
+.addPlaylistForm, .addTrackForm {
     display: flex;
     flex-direction: column;
     padding-left: 1em;
@@ -211,14 +221,49 @@ tbody tr:nth-child(odd) {
     background-color: #ec646d;
 }
 
-input, select {
-    width: 15em;
+input, select, button, textarea {
+    width: 100%;
+    margin-top: .5em;
+    margin-bottom: .1em;
+    resize: none;
 }
 
-@media screen and (max-width: 800px) {
+.imageInputDiv {
+    border-radius: 10px;
+    height: 15em;
+    width: 15em;
+    margin-left: auto;
+    padding: 1em;
+    margin-right: auto;
+    background-color: var(--light);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.imageInputDiv:hover {
+    background-color: #aed4cd;
+    cursor: pointer;
+}
+
+.imageInput:hover {
+    cursor: pointer;
+}
+
+.imageInput {
+    opacity: 0;
+    height: 100%;
+    width: 100%;
+}
+
+@media screen and (max-width: 900px) {
     .musicLibraryContainer {
         flex-direction: column;
         flex-wrap: wrap;
+    }
+
+    button {
+        margin-left: auto;
+        margin-right: auto;
     }
 
     table thead {

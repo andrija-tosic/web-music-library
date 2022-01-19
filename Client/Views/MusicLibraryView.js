@@ -1,4 +1,6 @@
 import { PlaylistView } from "../Views/PlaylistView.js";
+import { AddPlaylistForm } from "./AddPlaylistForm.js";
+import { EditPlaylistForm } from "./EditPlaylistForm.js";
 
 export class MusicLibraryView {
     constructor(musicLibrary) {
@@ -14,7 +16,6 @@ export class MusicLibraryView {
 
         const musicLibraryContainer = document.createElement("div");
         musicLibraryContainer.className = "musicLibraryContainer";
-        musicLibraryContainer.id = this.musicLibrary.id;
         this.container = musicLibraryContainer;
         root.appendChild(this.container);
 
@@ -47,55 +48,73 @@ export class MusicLibraryView {
 
             const playlistComponent = document.createElement("button");
             playlistComponent.className = "playlistComponent";
-            playlistComponent.id = playlist.id;
 
             playlistComponent.addEventListener("click", async () => {
                 this.playlistView.playlist = playlist;
+                console.log(playlist);
 
                 const playlistComponents = document.querySelectorAll(".playlistComponent");
                 playlistComponents.forEach(component => {
                     component.classList.remove("selectedPlaylist");
-                })
+                });
 
                 playlistComponent.classList.add("selectedPlaylist");
 
+                if (playlist.description === null || playlist.description === undefined) {
+                    await playlist.getFullPlaylistInfo();
+                }
+
+                this.playlistView.removePlaylistSidebar();
                 await this.playlistView.renderPlaylistSidebar();
             });
 
             const playlistImage = document.createElement("div");
             playlistImage.className = "playlistImage";
+            
+            if (playlist.imagePath === null || playlist.imagePath === undefined) {
+                playlistImage.style.backgroundImage = `url('./res/placeholder_image.jpg')`;
+            }
+            else {
+                playlistImage.style.backgroundImage = `url('${playlist.imagePath}')`;
+            }
+            
             playlistComponent.appendChild(playlistImage);
 
             const playlistLabel = document.createElement("label");
             playlistLabel.className = "playlistLabel";
             playlistLabel.innerText = playlist.name;
 
-            const playlistRenameBtn = document.createElement("button");
-            playlistRenameBtn.className = "playlistRenameBtn";
-            playlistRenameBtn.innerHTML = "Preimenuj";
-            playlistRenameBtn.id = playlist.id;
-            playlistRenameBtn.addEventListener("click", async(e) => {
+            const playlistEditBtn = document.createElement("button");
+            playlistEditBtn.className = "playlistEditBtn";
+            playlistEditBtn.innerHTML = "Izmeni";
+            playlistEditBtn.addEventListener("click", async (e) => {
                 e.stopPropagation();
-                let newName;
-                do {
-                    newName = prompt("Novi naziv plejliste");
-                } while (newName != null && newName === "")
-                let actionSucceeded = false;
-                actionSucceeded = await this.onBtnRenamePlaylistClick(playlist, newName);
-                if (actionSucceeded) {
-                    await this.renderPlaylistPicker();
+
+                const playlistComponents = document.querySelectorAll(".playlistComponent");
+                playlistComponents.forEach(component => {
+                    component.classList.remove("selectedPlaylist");
+                });
+                playlistComponent.classList.add("selectedPlaylist");
+
+                if (playlist.description === null || playlist.description === undefined) {
+                    await playlist.getFullPlaylistInfo();
                 }
+
+                this.playlistView.removePlaylistSidebar();
+                this.playlistView.renderSidebarOnly();
+                this.playlistView.renderEditPlaylistForm(playlist, this);
+
+                await this.renderPlaylistPicker();
             });
 
             const playlistDeleteBtn = document.createElement("button");
             playlistDeleteBtn.className = "playlistDeleteBtn";
             playlistDeleteBtn.innerHTML = "Obrisi";
-            playlistDeleteBtn.id = playlist.id;
             playlistDeleteBtn.addEventListener("click", e => this.onBtnDeletePlaylistClick(playlist, e.target));
 
 
-            playlistImage.appendChild(playlistLabel);
-            playlistComponent.appendChild(playlistRenameBtn);
+            playlistComponent.appendChild(playlistLabel);
+            playlistComponent.appendChild(playlistEditBtn);
             playlistComponent.appendChild(playlistDeleteBtn);
             playlistsContainer.appendChild(playlistComponent);
         }
@@ -103,17 +122,14 @@ export class MusicLibraryView {
         const addPlaylistComponent = document.createElement("button");
         addPlaylistComponent.className = "addPlaylistComponent";
 
-        addPlaylistComponent.addEventListener("click", async(e) => {
+        addPlaylistComponent.addEventListener("click", async (e) => {
             e.stopPropagation();
 
-            const newPlaylistName = prompt("Naziv nove plejliste:");
+            this.playlistView.removePlaylistSidebar();
+            this.playlistView.renderSidebarOnly();
+            this.playlistView.renderAddPlaylistForm(this);
 
-            let actionSucceeded = false;
-                actionSucceeded = await this.onBtnAddPlaylistClick(newPlaylistName);
-
-            if (actionSucceeded) {
-                await this.renderPlaylistPicker();
-            }
+            await this.renderPlaylistPicker();
         });
 
         const addPlaylist = document.createElement("div");
@@ -133,24 +149,9 @@ export class MusicLibraryView {
 
     //#region event handlers
 
-    async onBtnRenamePlaylistClick(playlist, name) {
-        if (name == null
-            || name === undefined
-            || name == " "
-            || name == "") {
-
-            alert("Unesite novi naziv plejliste.");
-            return false;
-        }
-
-        if (name == playlist.name) {
-            alert("Unesite drugaciji naziv od postojeceg.");
-            return false;
-        }
-
-        if (await playlist.renamePlaylist(name)) {
+    async onBtnEditPlaylistClick(playlist) {
+        if (await playlist.editPlaylist(playlist)) {
             await this.renderPlaylistPicker(this.container);
-            playlist.name = name;
 
             await this.playlistView.renderPlaylistSidebar();
 
@@ -163,7 +164,7 @@ export class MusicLibraryView {
 
         if (!confirm(`Sigurno obrisati "${playlist.name}"?`))
             return;
-        
+
         if (await this.musicLibrary.deletePlaylist(playlist)) {
             const playlistComponent = button.parentElement;
             playlistComponent.remove();
@@ -174,11 +175,11 @@ export class MusicLibraryView {
     }
 
     async onBtnAddPlaylistClick(name) {
-        if (name == null
-            || name === undefined
-            || name == " "
-            || name == "") {
+        if (name == null || name === undefined) {
+            return false;
+        }
 
+        if (name == " " || name == "") {
             alert("Unesite naziv nove plejliste.");
             return false;
         }

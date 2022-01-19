@@ -24,6 +24,11 @@ namespace Controllers
         {
             try
             {
+                if (id < 1)
+                {
+                    return BadRequest("ID out of range");
+                }
+
                 var query = Context.Releases
                 .Where(r => r.Artists.Select(a => a.Id).Contains(id));
 
