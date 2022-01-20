@@ -71,6 +71,12 @@ namespace Controllers
                 }
 
                 var p = await Context.Playlists.FindAsync(playlist.Id);
+ 
+                if (p == null)
+                {
+                    return NotFound($"Playlist with id {playlist.Id} not found.");
+                }
+
                 if (p.Name != playlist.Name || p.Description != playlist.Description || p.ImagePath != playlist.ImagePath)
                 {
                     p.Name = playlist.Name;
@@ -258,9 +264,6 @@ namespace Controllers
                 {
                     return BadRequest("Can't add empty named playlist.");
                 }
-
-                if (playlist.Description.Length > 300)
-                    return BadRequest("Description too long");
 
                 MusicLibrary musicLibrary = Context.MusicLibraries.Find(playlist.MusicLibraryId);
 
