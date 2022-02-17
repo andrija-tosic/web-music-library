@@ -13,7 +13,7 @@ export class Playlist {
     }
 
     async loadPlaylistTracks() {
-        const res = await fetch(`https://localhost:5001/Playlist/GetTracksFromPlaylist/${this.id}`);
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/GetTracksFromPlaylist/${this.id}`);
 
         const data = await res.json();
 
@@ -31,7 +31,7 @@ export class Playlist {
     }
 
     async getFullPlaylistInfo() {
-        const res = await fetch(`https://localhost:5001/Playlist/GetFullPlaylistInfo/${this.id}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/GetFullPlaylistInfo/${this.id}`, {
             method: "GET",
         });
 
@@ -59,7 +59,7 @@ export class Playlist {
 
     async editPlaylist(formData) {
         console.log(this.musicLibraryId, "before");
-        const res = await fetch(`https://localhost:5001/Playlist/EditPlaylist/`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/EditPlaylist/`, {
             method: "PUT",
             body: formData
         });
@@ -74,7 +74,7 @@ export class Playlist {
     }
 
     async removeTrackFromPlaylist(track) {
-        const res = await fetch(`https://localhost:5001/PlaylistTrack/RemoveTrackFromPlaylist/${track.number}/${this.id}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/PlaylistTrack/RemoveTrackFromPlaylist/${track.number}/${this.id}`, {
             method: "DELETE"
         });
 

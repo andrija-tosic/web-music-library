@@ -13,7 +13,7 @@ export class MusicLibrary {
     }
 
     async getPlaylists() {
-        const res = await fetch(`https://localhost:5001/Playlist/GetPlaylists/${this.id}`);
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/GetPlaylists/${this.id}`);
 
         if (!res.ok)
             return null;
@@ -32,7 +32,7 @@ export class MusicLibrary {
     }
 
     async addPlaylist(formData) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddPlaylist/`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/AddPlaylist/`, {
             method: "POST",
             body: formData
         });
@@ -50,7 +50,7 @@ export class MusicLibrary {
     }
 
     async deletePlaylist(playlist) {
-        const res = await fetch(`https://localhost:5001/Playlist/DeletePlaylist/${this.id}/${playlist.id}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/DeletePlaylist/${this.id}/${playlist.id}`, {
             method: "DELETE"
         });
 
@@ -64,7 +64,7 @@ export class MusicLibrary {
     }
 
     async matchArtists(match) {
-        const res = await fetch(`https://localhost:5001/Artist/MatchArtists/${match}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Artist/MatchArtists/${match}`, {
             method: "GET"
         });
 
@@ -81,7 +81,7 @@ export class MusicLibrary {
     }
 
     async getArtists() {
-        const res = await fetch(`https://localhost:5001/Artist/GetArtists`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Artist/GetArtists`, {
             method: "GET"
         });
 
@@ -98,7 +98,7 @@ export class MusicLibrary {
     }
 
     async getReleasesFromArtist(artistId) {
-        const res = await fetch(`https://localhost:5001/Release/GetReleasesFromArtist/${artistId}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Release/GetReleasesFromArtist/${artistId}`, {
             method: "GET"
         });
 
@@ -119,7 +119,7 @@ export class MusicLibrary {
     }
 
     async getTracksFromRelease(artistId, releaseId) {
-        const res = await fetch(`https://localhost:5001/Track/GetTracksFromRelease/${releaseId}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Track/GetTracksFromRelease/${releaseId}`, {
             method: "GET"
         });
 
@@ -141,7 +141,7 @@ export class MusicLibrary {
     }
 
     async addTracksToPlaylist(trackIds, playlist) {
-        const res = await fetch(`https://localhost:5001/Playlist/AddTracksToPlaylist/${playlist.id}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Playlist/AddTracksToPlaylist/${playlist.id}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

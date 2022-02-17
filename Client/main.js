@@ -2,7 +2,7 @@ import { MusicLibrary } from "./Models/MusicLibrary.js"
 import { MusicLibraryView } from "./Views/MusicLibraryView.js";
 
 async function getMusicLibraries() {
-    const res = await fetch("https://localhost:5001/MusicLibrary/GetMusicLibraries");
+    const res = await fetch("https://musiclibrary.azurewebsites.net/MusicLibrary/GetMusicLibraries");
 
     if (res.ok) {
         const data = await res.json();

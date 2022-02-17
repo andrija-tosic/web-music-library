@@ -10,7 +10,7 @@ export class Track {
     }
 
     async changeTrackRating(newRating) {
-        const res = await fetch(`https://localhost:5001/Track/ChangeRating/${this.id}/${newRating}`, {
+        const res = await fetch(`https://musiclibrary.azurewebsites.net/Track/ChangeRating/${this.id}/${newRating}`, {
             method: "PATCH"
         });
 
